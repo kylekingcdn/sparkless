@@ -70,6 +70,18 @@ QDomElement Enclosure::EnclosureNode(QDomDocument& theDocument) const {
   node.setAttribute("sparkle:dsaSignature", signature);
   node.setAttribute("type", "application/octet-stream");
 
+  if (os == Windows) {
+
+    // InnoSetup
+    node.setAttribute("sparkle:installerArguments", "/SILENT /SP-");
+
+    // MSI
+    //node.setAttribute("sparkle:installerArguments", "/passive");
+
+    // NSIS
+    //node.setAttribute("sparkle:installerArguments", "/S");
+  }
+
   return node;
 }
 

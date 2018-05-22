@@ -40,7 +40,7 @@ public:
   QString PlatformString() const { return PlatformString(os); }
 
   static QString SparklePlatformString(const Platform);
-  QString SparklePlatformString() const { return PlatformString(os); }
+  QString SparklePlatformString() const { return SparklePlatformString(os); }
 
   Platform OS() const { return os; }
   const QString& Filepath() const { return filepath; }

@@ -11,14 +11,17 @@ A mac bundle and/or windows bundle must be added with their respective signature
 Valid usage examples
 
 Mac
+----
 `sparkless appcast.xml "https://s3-us-west-2.amazonaws.com/bucket/releases" "1.0.0" 1 \
            -mF app-1.0.0-1.dmg -mS "SIGNATURE"`
 
 Windows
+----
 `sparkless appcast.xml "https://s3-us-west-2.amazonaws.com/bucket/releases" "1.0.0" 1 \
            -wF appSetup-1.0.0-1.exe -wS "SIGNATURE"`
 
-Mac & Windows
+Mac & Windows Simultaneously
+----
 `sparkless appcast.xml "https://s3-us-west-2.amazonaws.com/bucket/releases" "1.0.0" 1 \
            -mF app-1.0.0-1.dmg -mS "SIGNATURE" \
            -wF appSetup-1.0.0-1.exe -wS "SIGNATURE"`

@@ -160,7 +160,7 @@ int main(int argc, char *argv[]) {
 //    descriptionNode.appendChild(appcastDoc.createTextNode("INSERT DESCRIPTION HERE"));
 
     const QUrl releaseNotesURL = QString("%1/release-notes/%2-%3.md").arg(bucket.toString()).arg(version).arg(buildNumber);
-    QDomElement releaseNotesNode = appcastDoc.createElement("pubDate");
+    QDomElement releaseNotesNode = appcastDoc.createElement("sparkle:releaseNotesLink");
     itemNode.appendChild(releaseNotesNode);
     releaseNotesNode.appendChild(appcastDoc.createTextNode(releaseNotesURL.toString()));
 

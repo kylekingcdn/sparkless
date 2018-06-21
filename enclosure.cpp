@@ -12,8 +12,12 @@
 #include <QFileInfo>
 #include <QDebug>
 
-Enclosure::Enclosure(const Platform theOS, const QString& theFile, const QString& theSignature, const QString theVersion, const int theBuild, const QUrl& theBucket)
-  : os(theOS), filepath(theFile), signature(theSignature), version(theVersion), buildNumber(theBuild), bucketURL(theBucket) {
+Enclosure::Enclosure(const Platform theOS, const QString& theFile, const QString& theSignature,
+                     const QString theVersion, const int theBuild,
+                     const QUrl& theBucket, const QString theBucketDir)
+  : os(theOS), filepath(theFile), signature(theSignature),
+    version(theVersion), buildNumber(theBuild),
+    bucketURL(theBucket), bucketDir(theBucketDir) {
 
 }
 
@@ -49,7 +53,7 @@ qint64 Enclosure::Length() const {
 
 QUrl Enclosure::ReleaseURL() const {
 
-  return QString("%1/releases/%2/%3").arg(bucketURL.toString()).arg(PlatformString()).arg(Filename());
+  return QString("%1%2/%3/%4").arg(bucketURL.toString()).arg(BucketDir()).arg(PlatformString()).arg(Filename());
 }
 
 //QUrl Enclosure::ReleaseNotesURL() const {

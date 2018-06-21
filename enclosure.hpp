@@ -26,13 +26,16 @@ private:
 
   QString version;
   int buildNumber;
+
   QUrl bucketURL;
+  QString bucketDir;
 
 
 public:
 
   Enclosure(const Platform theOS, const QString& theFile, const QString& theSignature,
-            const QString theVersion, const int theBuild, const QUrl& theBucket);
+            const QString theVersion, const int theBuild,
+            const QUrl& theBucket, const QString theBucketDir);
 
 //  Enclosure();
 
@@ -48,7 +51,9 @@ public:
 
   const QString& Version() const { return version; }
   int BuildNumber() const { return buildNumber; }
+
   const QUrl BucketURL() const { return bucketURL; }
+  const QString& BucketDir() const { return bucketDir; }
 
   QString Filename() const;
   qint64 Length() const;

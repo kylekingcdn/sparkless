@@ -67,6 +67,7 @@ int main(int argc, char *argv[]) {
 
   parser.addPositionalArgument("appcast", "local sparkle appcast.xml", "filepath");
   parser.addPositionalArgument("bucket", "S3 Bucket URL.", "url");
+  parser.addPositionalArgument("bucketDir", "S3 Bucket dir.", "url");
   parser.addPositionalArgument("version", "long version string");
   parser.addPositionalArgument("build", "build number");
 
@@ -92,18 +93,19 @@ int main(int argc, char *argv[]) {
 
   parser.process(a);
 
-  if (parser.positionalArguments().count() != 4) { qWarning() << "\nUsage:    sparkless appcast bucket version build [options]"; return 1; }
+  if (parser.positionalArguments().count() != 5) { qWarning() << "\nUsage:    sparkless appcast bucket bucketDir version build [options]"; return 1; }
 
 
   /* -------- Initialize Variables -------- */
 
   const QString appcastPath = parser.positionalArguments().at(0);
   const QUrl bucket = parser.positionalArguments().at(1);
-  const QString version = parser.positionalArguments().at(2);
-  const int buildNumber = parser.positionalArguments().at(3).toInt();
+  const QString bucketDir = parser.positionalArguments().at(2);
+  const QString version = parser.positionalArguments().at(3);
+  const int buildNumber = parser.positionalArguments().at(4).toInt();
 
   if (!bucket.isValid()) { qWarning("\nError - Malformed remote URL"); return 1; }
-  if (QString::number(buildNumber) != parser.positionalArguments().at(3)) { qWarning("\nError parsing build number"); return 1; }
+  if (QString::number(buildNumber) != parser.positionalArguments().at(4)) { qWarning("\nError parsing build number"); return 1; }
 
   const bool hasMac = parser.isSet(macFileOption) || parser.isSet(macSignatureOption);
   const bool hasWindows = parser.isSet(winFileOption) || parser.isSet(winSignatureOption);
@@ -139,8 +141,8 @@ int main(int argc, char *argv[]) {
 
   QList<Enclosure> enclosures;
 
-  if (hasMac) { enclosures += Enclosure(Enclosure::Mac, macPath, macSignature, version, buildNumber, bucket); }
-  if (hasWindows) { enclosures += Enclosure(Enclosure::Windows, winPath, winSignature, version, buildNumber, bucket); }
+  if (hasMac) { enclosures += Enclosure(Enclosure::Mac, macPath, macSignature, version, buildNumber, bucket, bucketDir); }
+  if (hasWindows) { enclosures += Enclosure(Enclosure::Windows, winPath, winSignature, version, buildNumber, bucket, bucketDir); }
 
   // Create item node if it doesn't exist
   QDomElement itemNode = ItemNodeForBuildNumber(buildNumber, channelNode);

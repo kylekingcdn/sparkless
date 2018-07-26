@@ -1,5 +1,5 @@
 # Spark(less)
-Qt-based command line program that automatically updates a sparkle appcast.xml file.This is still a work in progress in order to facilitate usage for other developer’s usecase.
+Qt-based command line program that automatically updates a sparkle appcast.xml file.This is still a work in progress in order to facilitate usage for other developers' usecases.
 
 ----
 

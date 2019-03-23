@@ -1,5 +1,5 @@
 # Spark(less)
-Qt-based command line program that automatically updates a sparkle appcast.xml file.This is still a work in progress in order to facilitate usage for other developers' usecases.
+Sparkless is a Qt-based command line program that automatically updates a sparkle appcast.xml file. Upon completion Sparkless will facilitate usage for other developers' needs.
 
 ----
 
@@ -7,7 +7,7 @@ Qt-based command line program that automatically updates a sparkle appcast.xml f
 
 `sparkless [appcastFile] [remoteURL] [version] [buildNumber]`
 
-A mac bundle and/or windows bundle must be added with their respective signatures
+For proper usage Mac or Windows bundles are required along with their respective signatures.
 
 #### Valid usage examples
 
@@ -37,12 +37,11 @@ sparkless ./appcast.xml "https://s3-us-west-2.amazonaws.com/bucket/releases" "1.
 
 ### Usage Notes
 
-* This is still a work in progress in order to facilitate usage for other developer’s usecase.
-* The [RemoteURL] and [ReleaseNotesURL] attributes are both configured for a specific use case. Adjust as needed.
-* Descriptions are temporarily disabled, and a flag to toggle description or release notes will be added.If a bundle with the same version and OS is found sparkless will return an error.
-This messages can be surpressed with -f and the matching enclosure values will be overwritten [THEY WILL NOT PLACED IN A NEW ITEM]
+* The [RemoteURL] and [ReleaseNotesURL] attributes are both configured for a specific use case and can be adjusted as required.
+* Descriptions are temporarily disabled, and a flag to toggle description or release notes will be added. If a bundle with the same version and OS is found sparkless will return an error.
+This message can be supressed with -f and the matching enclosure values will be overwritten but will not be placed in a new item.
 
-* If a bundle has a matching version but no enclosure for the specified OS, the bundle will be placed in the existing item. This allows for easy maintanence of multple bundles.
+* If a bundle has a matching version but no enclosure for the specified OS, the bundle will be placed in the existing item. This allows for easy maintenance of multiple bundles.
 
 ```c++
 sparkless ./appcast.xml "https://s3-us-west-2.amazonaws.com/bucket/releases" "1.0.0" 1 \
@@ -51,4 +50,4 @@ sparkless ./appcast.xml "https://s3-us-west-2.amazonaws.com/bucket/releases" "1.
           -wF ./appSetup-1.0.0-1.exe -wS "SIGNATURE"
 ```
            
-* In laymans terms - if both of these commands were run, the appcast would be generated successfully and both bundles would be listed under the same 'item' xml node.
+* If the above commands are run, the appcast will generate successfully and both bundles would be listed under the same 'item' xml node.

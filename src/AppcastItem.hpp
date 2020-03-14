@@ -14,6 +14,8 @@
 #include <QUrl>
 #include <QDateTime>
 
+#include "Constants.hpp"
+
 class ItemEnclosure;
 class ItemDelta;
 

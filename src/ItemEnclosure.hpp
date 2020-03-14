@@ -14,17 +14,10 @@
 #include <QUrl>
 #include <QDateTime>
 
+#include "Constants.hpp"
+
 class ItemEnclosure : public QObject {
   Q_OBJECT
-
-public:
-
-  enum EnclosurePlatform {
-    NullPlatform = 0,
-    MacPlatform,
-    WindowsPlatform,
-  };
-  Q_ENUM(EnclosurePlatform);
 
 private:
 

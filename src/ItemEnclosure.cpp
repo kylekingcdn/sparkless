@@ -45,7 +45,7 @@ ItemEnclosure::~ItemEnclosure() {
 
 #pragma mark Public
 
-ItemEnclosure::EnclosurePlatform ItemEnclosure::PlatformFromString(const QString& theString) {
+EnclosurePlatform ItemEnclosure::PlatformFromString(const QString& theString) {
 
   EnclosurePlatform platform = NullPlatform;
 
@@ -59,7 +59,7 @@ ItemEnclosure::EnclosurePlatform ItemEnclosure::PlatformFromString(const QString
   return platform;
 }
 
-QString ItemEnclosure::PlatformToString(const ItemEnclosure::EnclosurePlatform& thePlatform) {
+QString ItemEnclosure::PlatformToString(const EnclosurePlatform& thePlatform) {
 
   switch (thePlatform) {
     case MacPlatform: {
@@ -74,7 +74,7 @@ QString ItemEnclosure::PlatformToString(const ItemEnclosure::EnclosurePlatform& 
   }
 }
 
-QString ItemEnclosure::PlatformToDescription(const ItemEnclosure::EnclosurePlatform& thePlatform) {
+QString ItemEnclosure::PlatformToDescription(const EnclosurePlatform& thePlatform) {
 
   switch (thePlatform) {
     case MacPlatform: {

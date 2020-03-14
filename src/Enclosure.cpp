@@ -6,7 +6,7 @@
 //  Copyright © 2016 Divide Software Inc. All rights reserved.
 //
 
-#include "enclosure.hpp"
+#include "Enclosure.hpp"
 
 #include <QFile>
 #include <QFileInfo>

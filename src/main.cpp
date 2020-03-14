@@ -8,7 +8,7 @@
 
 #include <QCoreApplication>
 
-#include "enclosure.hpp"
+#include "Enclosure.hpp"
 
 #include <QCommandLineParser>
 #include <QFile>

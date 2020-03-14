@@ -15,9 +15,9 @@
 Enclosure::Enclosure(const Platform theOS, const QString& theFile, const QString& theSignature,
                      const QString theVersion, const int theBuild,
                      const QUrl& theBucket, const QString theBucketDir)
-  : os(theOS), filepath(theFile), signature(theSignature),
-    version(theVersion), buildNumber(theBuild),
-    bucketURL(theBucket), bucketDir(theBucketDir) {
+: os(theOS), filepath(theFile), signature(theSignature),
+  version(theVersion), buildNumber(theBuild),
+  bucketURL(theBucket), bucketDir(theBucketDir), QObject(nullptr) {
 
 }
 

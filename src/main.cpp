@@ -29,7 +29,9 @@ QDomElement ItemNodeForBuildNumber(const int theVersion, QDomElement channelNode
   return QDomElement();
 }
 
-QDomElement EnclosureConflict(const Enclosure theEnclosure, const QDomElement channelNode) {
+QDomElement EnclosureConflict(Enclosure* theEnclosure, const QDomElement channelNode) {
+
+  Q_ASSERT(theEnclosure != nullptr);
 
   QDomElement itemNode = channelNode.firstChildElement("item");
 
@@ -42,7 +44,7 @@ QDomElement EnclosureConflict(const Enclosure theEnclosure, const QDomElement ch
       const int enclosureBuild = enclosureNode.attribute("sparkle:version").toInt();
       const QString enclosureOS = enclosureNode.attribute("sparkle:os");
 
-      if (enclosureBuild == theEnclosure.BuildNumber() && enclosureOS == theEnclosure.SparklePlatformString()) { return enclosureNode; }
+      if (enclosureBuild == theEnclosure->BuildNumber() && enclosureOS == theEnclosure->SparklePlatformString()) { return enclosureNode; }
 
       enclosureNode = enclosureNode.nextSiblingElement("enclosure");
     }
@@ -139,10 +141,14 @@ int main(int argc, char *argv[]) {
 
   const QString bundleName = channelNode.firstChildElement("title").firstChild().nodeValue();
 
-  QList<Enclosure> enclosures;
+  QList<Enclosure*> enclosures;
 
-  if (hasMac) { enclosures += Enclosure(Enclosure::Mac, macPath, macSignature, version, buildNumber, bucket, bucketDir); }
-  if (hasWindows) { enclosures += Enclosure(Enclosure::Windows, winPath, winSignature, version, buildNumber, bucket, bucketDir); }
+  if (hasMac) {
+    enclosures.append(new Enclosure(Enclosure::Mac, macPath, macSignature, version, buildNumber, bucket, bucketDir));
+  }
+  if (hasWindows) {
+    enclosures.append(new Enclosure(Enclosure::Windows, winPath, winSignature, version, buildNumber, bucket, bucketDir));
+  }
 
   // Create item node if it doesn't exist
   QDomElement itemNode = ItemNodeForBuildNumber(buildNumber, channelNode);
@@ -172,19 +178,20 @@ int main(int argc, char *argv[]) {
   }
 
   // check for duplicate build
-  for (int i =0; i<enclosures.count(); i++) {
+  foreach (Enclosure* currEnclosure, enclosures) {
 
-    Enclosure currEnclosure = enclosures[i];
-    if (!currEnclosure.IsValid()) { qDebug() << "Errors:\n  " << currEnclosure.Errors().join("  \n"); return 1; }
+    Q_ASSERT(currEnclosure != nullptr);
 
-    QDomElement newNode = currEnclosure.EnclosureNode(appcastDoc);
+    if (!currEnclosure->IsValid()) { qDebug() << "Errors:\n  " << currEnclosure->Errors().join("  \n"); return 1; }
+
+    QDomElement newNode = currEnclosure->EnclosureNode(appcastDoc);
     QDomElement existingNode = EnclosureConflict(currEnclosure, channelNode);
 
     if (existingNode.isNull()) { itemNode.appendChild(newNode); }
     else if (forceOverwrite) { itemNode.replaceChild(newNode, existingNode); }
-    else { qWarning().noquote() << "\nBuild" << buildNumber << "already exists for" << currEnclosure.PlatformString() << "\nTo supress this message and overwrite the current enclosure use option -f"; return 1; }
+    else { qWarning().noquote() << "\nBuild" << buildNumber << "already exists for" << currEnclosure->PlatformString() << "\nTo supress this message and overwrite the current enclosure use option -f"; return 1; }
 
-    currEnclosure.Print();
+    currEnclosure->Print();
   }
 
   if (!appcastFile.open(QIODevice::ReadWrite| QIODevice::Truncate)) { qWarning() << "\nError opening appcast file for writing"; return 1; }
@@ -192,6 +199,8 @@ int main(int argc, char *argv[]) {
   QTextStream textStream(&appcastFile);
   appcastDoc.save(textStream, 0);
   appcastFile.close();
+
+  qDeleteAll(enclosures);
 
   return 0;
 }

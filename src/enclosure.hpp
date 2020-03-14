@@ -12,7 +12,8 @@
 #include <QtCore>
 #include <QDomElement>
 
-class Enclosure {
+class Enclosure : public QObject {
+  Q_OBJECT
 
 public:
 
@@ -36,8 +37,6 @@ public:
   Enclosure(const Platform theOS, const QString& theFile, const QString& theSignature,
             const QString theVersion, const int theBuild,
             const QUrl& theBucket, const QString theBucketDir);
-
-//  Enclosure();
 
   static QString PlatformString(const Platform);
   QString PlatformString() const { return PlatformString(os); }

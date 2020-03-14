@@ -1,5 +1,5 @@
 # Spark(less)
-Sparkless is a Qt-based command line program that automatically updates a sparkle appcast.xml file. Upon completion Sparkless will facilitate usage for other developers' needs.
+Spark(less) is a Qt-based command line program that automatically updates a sparkle appcast.xml file. Upon completion Sparkless will facilitate usage for other developers' needs.
 
 ----
 

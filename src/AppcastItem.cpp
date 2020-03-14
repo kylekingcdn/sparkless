@@ -70,7 +70,7 @@ void AppcastItem::Print() const {
   foreach (ItemEnclosure* currEnclosure, enclosures) {
     if (currEnclosure != nullptr) {
 
-      qDebug().noquote().nospace() << "     " << QString("%1:  %2").arg(currEnclosure->PlatformDescription(), 7).arg(currEnclosure->FileUrl().toString());
+      qDebug().noquote().nospace() << "     " << QString("%1:  %2").arg(currEnclosure->PlatformDescription(), 7).arg(currEnclosure->FileUrl().toString()) << QString("  [%1]").arg(currEnclosure->SignatureTypeDescription());
     }
   }
 }

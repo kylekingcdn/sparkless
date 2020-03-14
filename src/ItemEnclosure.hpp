@@ -21,6 +21,8 @@ class ItemEnclosure : public QObject {
 
 private:
 
+  static QList<EnclosureSignatureType> VALID_SIGNATURE_TYPES;
+
   QDomElement enclosureElement;
 
   QString versionDescription;
@@ -29,7 +31,9 @@ private:
   QUrl fileUrl;
   QString mimeType;
   qlonglong length = -1;
+
   QByteArray signature;
+  EnclosureSignatureType signatureType = NullSignature;
 
   EnclosurePlatform platform = NullPlatform;
 
@@ -68,14 +72,22 @@ public:
   const QUrl& FileUrl() const { return fileUrl; }
   const QString& MimeType() const { return mimeType; }
   qlonglong Length() const { return length; }
+
   const QByteArray& Signature() const { return signature; }
+  EnclosureSignatureType SignatureType() const { return signatureType; }
+  QString SignatureTypeXmlKey() const { return SignatureTypeToXmlKey(signatureType); }
+  QString SignatureTypeDescription() const { return SignatureTypeToDescription(signatureType); }
 
   EnclosurePlatform Platform() const { return platform; }
-  QString PlatformString() const { return PlatformToString(platform); }
+  QString PlatformXmlValue() const { return PlatformToXmlValue(platform); }
   QString PlatformDescription() const { return PlatformToDescription(platform); }
-  
-  static EnclosurePlatform PlatformFromString(const QString&);
-  static QString PlatformToString(const EnclosurePlatform&);
+
+  static EnclosureSignatureType SignatureTypeFromXmlKey(const QString&);
+  static QString SignatureTypeToXmlKey(const EnclosureSignatureType);
+  static QString SignatureTypeToDescription(const EnclosureSignatureType);
+
+  static EnclosurePlatform PlatformFromXmlValue(const QString&);
+  static QString PlatformToXmlValue(const EnclosurePlatform&);
   static QString PlatformToDescription(const EnclosurePlatform&);
 
   virtual void Print() const;

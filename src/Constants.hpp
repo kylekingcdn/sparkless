@@ -19,4 +19,12 @@ enum EnclosurePlatform {
 
 Q_DECLARE_METATYPE(EnclosurePlatform);
 
+enum EnclosureSignatureType {
+  NullSignature = 0,
+  DsaSignature,
+  Ed25519Signature,
+};
+
+Q_DECLARE_METATYPE(EnclosureSignatureType);
+
 #endif /* Constants_hpp */

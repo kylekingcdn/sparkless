@@ -10,6 +10,11 @@
 
 #include <QDebug>
 
+QList<EnclosureSignatureType> ItemEnclosure::VALID_SIGNATURE_TYPES = {
+  Ed25519Signature,
+  DsaSignature,
+};
+
 #pragma mark - Constructors -
 
 #pragma mark Protected
@@ -45,7 +50,51 @@ ItemEnclosure::~ItemEnclosure() {
 
 #pragma mark Public
 
-EnclosurePlatform ItemEnclosure::PlatformFromString(const QString& theString) {
+EnclosureSignatureType ItemEnclosure::SignatureTypeFromXmlKey(const QString& theString) {
+
+  EnclosureSignatureType signatureType = NullSignature;
+
+  if (theString == "sparkle:dsaSignature") {
+    signatureType = DsaSignature;
+  }
+  else if (theString == "sparkle:edSignature") {
+    signatureType = Ed25519Signature;
+  }
+
+  return signatureType;
+}
+
+QString ItemEnclosure::SignatureTypeToXmlKey(const EnclosureSignatureType theSignatureType) {
+
+  switch (theSignatureType) {
+    case DsaSignature: {
+      return "sparkle:dsaSignature";
+    }
+    case Ed25519Signature: {
+      return "sparkle:edSignature";
+    }
+    default: {
+      return "";
+    }
+  }
+}
+
+QString ItemEnclosure::SignatureTypeToDescription(const EnclosureSignatureType theSignatureType) {
+
+  switch (theSignatureType) {
+    case DsaSignature: {
+      return "DSA";
+    }
+    case Ed25519Signature: {
+      return "Ed25519";
+    }
+    default: {
+      return "";
+    }
+  }
+}
+
+EnclosurePlatform ItemEnclosure::PlatformFromXmlValue(const QString& theString) {
 
   EnclosurePlatform platform = NullPlatform;
 
@@ -59,7 +108,7 @@ EnclosurePlatform ItemEnclosure::PlatformFromString(const QString& theString) {
   return platform;
 }
 
-QString ItemEnclosure::PlatformToString(const EnclosurePlatform& thePlatform) {
+QString ItemEnclosure::PlatformToXmlValue(const EnclosurePlatform& thePlatform) {
 
   switch (thePlatform) {
     case MacPlatform: {
@@ -111,17 +160,24 @@ bool ItemEnclosure::ParseXml() {
   fileUrl = QUrl(enclosureElement.attribute("url"));
   mimeType = enclosureElement.attribute("type");
   length = enclosureElement.hasAttribute("length") ? enclosureElement.attribute("length").toLongLong() : -1;
-  if (enclosureElement.hasAttribute("sparkle:dsaSignature")) {
-    signature = enclosureElement.attribute("sparkle:dsaSignature").toUtf8();
+
+  // iterate through possible signature types (by priority) and assign the first available
+  foreach (const EnclosureSignatureType currSignatureType, VALID_SIGNATURE_TYPES) {
+
+    const QString currSignatureTypeKey = SignatureTypeToXmlKey(currSignatureType);
+
+    if (enclosureElement.hasAttribute(currSignatureTypeKey)) {
+      signature = enclosureElement.attribute(currSignatureTypeKey).toUtf8();
+      signatureType = currSignatureType;
+      break;
+    }
   }
-  else if (enclosureElement.hasAttribute("sparkle:edSignature")) {
-    signature = enclosureElement.attribute("sparkle:edSignature").toUtf8();
-  }
-  else {
+  
+  if (signatureType == NullSignature) {
     qWarning() << "ItemEnclosure::ParseXml() warning - enclosure is missing signature: " << enclosureElement.toDocument().toString();
   }
 
-  platform = PlatformFromString(enclosureElement.attribute("sparkle:os"));
+  platform = PlatformFromXmlValue(enclosureElement.attribute("sparkle:os"));
 
   return true;
 }

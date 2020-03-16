@@ -10,6 +10,7 @@
 #define Constants_hpp
 
 #include <QMetaType>
+#include <QString>
 
 enum EnclosurePlatform {
   NullPlatform = 0,
@@ -26,5 +27,7 @@ enum EnclosureSignatureType {
 };
 
 Q_DECLARE_METATYPE(EnclosureSignatureType);
+
+QString HelperScriptsDir();
 
 #endif /* Constants_hpp */

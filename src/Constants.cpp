@@ -7,3 +7,14 @@
 //
 
 #include "Constants.hpp"
+
+#include <QDir>
+
+QString HelperScriptsDir() {
+
+#ifdef DEBUG
+  return QDir::currentPath() + "/scripts";
+#else
+  return qApp->applicationDirPath();
+#endif
+}

@@ -27,6 +27,8 @@ private:
   QDomElement itemElement;
 
   QString title;
+  QString description;
+
   QUrl releaseNotesUrl;
   QDateTime publishedTimestamp;
 
@@ -36,18 +38,22 @@ private:
   QList<ItemEnclosure*> enclosures;
   QList<ItemDelta*> deltas;
 
+  QHash<qlonglong, QHash<EnclosurePlatform, ItemDelta*>> deltaHash;
+
 
 #pragma mark - Constructors -
 
 #pragma mark Private
 private:
 
+  AppcastItem(QObject* theParent = nullptr);
   AppcastItem(const QDomElement&, QObject* theParent = nullptr);
 
 #pragma mark Public
 public:
 
   static AppcastItem* FromElement(const QDomElement&, QObject* theParent = nullptr);
+  static AppcastItem* NewItem(const QString& theVersionDescription, const qlonglong theVersionBuild, QObject* theParent = nullptr);
 
   virtual ~AppcastItem() Q_DECL_OVERRIDE;
 
@@ -64,6 +70,8 @@ private:
 public:
 
   const QString Title() const { return title; }
+  const QString Description() const { return description; }
+
   const QUrl& ReleaseNotesUrl() const { return releaseNotesUrl; }
 
   const QDateTime PublishedTimestamp() const { return publishedTimestamp; }
@@ -73,7 +81,12 @@ public:
   qlonglong VersionBuild() const { return versionBuild; }
 
   const QList<ItemEnclosure*>& Enclosures() const { return enclosures; }
+  ItemEnclosure* Enclosure(const EnclosurePlatform) const;
+  bool HasEnclosure(const EnclosurePlatform) const;
+
   const QList<ItemDelta*>& Deltas() const { return deltas; }
+  ItemDelta Delta(const EnclosurePlatform, const qlonglong) const;
+
 
   void Print() const;
 
@@ -88,6 +101,13 @@ private:
 #pragma mark Public
 public:
 
+  void SetTitle(const QString&);
+  void SetDescription(const QString&);
+  void SetReleaseNotesUrl(const QUrl&);
+
+  ItemEnclosure* AddEnclosure(const qlonglong theLength, const QUrl& theUrl, const EnclosurePlatform thePlatform, const QByteArray& theSignature, const EnclosureSignatureType theSignatureType);
+
+  //ItemDelta* AddDelta();
 
 };
 

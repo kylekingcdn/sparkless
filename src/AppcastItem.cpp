@@ -17,6 +17,11 @@
 
 #pragma mark Private
 
+AppcastItem::AppcastItem(QObject* theParent)
+: QObject(theParent) {
+
+}
+
 AppcastItem::AppcastItem(const QDomElement& theItemElement, QObject* theParent)
 : QObject(theParent) {
 
@@ -34,6 +39,16 @@ AppcastItem* AppcastItem::FromElement(const QDomElement& theItemElement, QObject
     item = nullptr;
   }
 
+  return item;
+}
+
+AppcastItem* AppcastItem::NewItem(const QString& theVersionDescription, const qlonglong theVersionBuild, QObject* theParent) {
+
+  AppcastItem* item = new AppcastItem(theParent);
+  item->versionDescription = theVersionDescription;
+  item->versionBuild = theVersionBuild;
+  item->publishedTimestamp = QDateTime::currentDateTimeUtc();
+  
   return item;
 }
 
@@ -61,16 +76,36 @@ QString AppcastItem::TimestampToString(const QDateTime& theTimestamp) {
 
 #pragma mark Public
 
+ItemEnclosure* AppcastItem::Enclosure(const EnclosurePlatform thePlatform) const {
+
+  foreach (ItemEnclosure* currEnclosure, enclosures) {
+
+    if (currEnclosure != nullptr && currEnclosure->Platform() == thePlatform) {
+      return currEnclosure;
+    }
+  }
+
+  return nullptr;
+}
+
+bool AppcastItem::HasEnclosure(const EnclosurePlatform thePlatform) const {
+
+  return Enclosure(thePlatform) != nullptr;
+}
+
 void AppcastItem::Print() const {
 
-  qDebug();
-  qDebug().noquote().nospace() << QString("%1 %2 (%3)").arg(title).arg(versionDescription).arg(versionBuild);
-  qDebug().noquote().nospace() << "  Published: " << publishedTimestamp.toString();
-  qDebug().noquote().nospace() << "  Enclosures";
+  qInfo();
+  qInfo().noquote().nospace() << QString("%1 %2 (%3)").arg(title).arg(versionDescription).arg(versionBuild);
+  qInfo().noquote().nospace() << "  Published: " << publishedTimestamp.toString();
+  qInfo().noquote().nospace() << "  Enclosures";
   foreach (ItemEnclosure* currEnclosure, enclosures) {
     if (currEnclosure != nullptr) {
 
-      qDebug().noquote().nospace() << "     " << QString("%1:  %2").arg(currEnclosure->PlatformDescription(), 7).arg(currEnclosure->FileUrl().toString()) << QString("  [%1]").arg(currEnclosure->SignatureTypeDescription());
+      qInfo().noquote().nospace() << "     "
+        << QString("%1:  %2").arg(currEnclosure->PlatformDescription(), 7).arg(currEnclosure->FileUrl().toString())
+        << QString(" [%1]").arg(currEnclosure->SignatureTypeDescription())
+        << (!currEnclosure->InstallerArguments().isEmpty() ? QString(" (%1)").arg(currEnclosure->InstallerArguments().join(" ")) : "");
     }
   }
 }
@@ -84,6 +119,7 @@ void AppcastItem::Print() const {
 bool AppcastItem::ParseXml() {
 
   title = itemElement.firstChildElement("title").firstChild().nodeValue();
+  description = itemElement.firstChildElement("description").firstChild().nodeValue();
   releaseNotesUrl = itemElement.firstChildElement("sparkle:releaseNotesLink").firstChild().nodeValue();
 
   const QString publishedTimestampStr = itemElement.firstChildElement("pubDate").firstChild().nodeValue();
@@ -114,9 +150,11 @@ bool AppcastItem::ParseXml() {
 
     while (!deltaEnclosureElement.isNull()) {
 
-      ItemDelta* enclosure = ItemDelta::FromElement(deltaEnclosureElement, this);
-      if (enclosure != nullptr) {
-        enclosures.append(enclosure);
+      ItemDelta* delta = ItemDelta::FromElement(deltaEnclosureElement, this);
+      if (delta != nullptr) {
+        enclosures.append(delta);
+
+        deltaHash[delta->VersionBuild()][delta->Platform()] = delta;
       }
 
       deltaEnclosureElement = deltaEnclosureElement.nextSiblingElement("enclosure");
@@ -128,3 +166,28 @@ bool AppcastItem::ParseXml() {
 
 #pragma mark Public
 
+void AppcastItem::SetTitle(const QString& theTitle) {
+
+  title = theTitle;
+}
+
+void AppcastItem::SetDescription(const QString& theDescription) {
+
+  description = theDescription;
+}
+
+void AppcastItem::SetReleaseNotesUrl(const QUrl& theUrl) {
+
+  releaseNotesUrl = theUrl;
+}
+
+ItemEnclosure* AppcastItem::AddEnclosure(const qlonglong theLength, const QUrl &theUrl, const EnclosurePlatform thePlatform, const QByteArray &theSignature, const EnclosureSignatureType theSignatureType) {
+
+  ItemEnclosure* enclosure = ItemEnclosure::NewEnclosure(theLength, versionBuild, versionDescription, theUrl, thePlatform, theSignature, theSignatureType);
+  if (enclosure != nullptr) {
+
+    enclosures.append(enclosure);
+  }
+
+  return enclosure;
+}

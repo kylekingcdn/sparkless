@@ -19,6 +19,11 @@ QList<EnclosureSignatureType> ItemEnclosure::VALID_SIGNATURE_TYPES = {
 
 #pragma mark Protected
 
+ItemEnclosure::ItemEnclosure(QObject* theParent)
+: QObject(theParent) {
+  
+}
+
 ItemEnclosure::ItemEnclosure(const QDomElement& theEnclosureElement, QObject* theParent)
 : QObject(theParent) {
 
@@ -37,6 +42,33 @@ ItemEnclosure* ItemEnclosure::FromElement(const QDomElement& theEnclosureElement
   }
 
   return enclsoure;
+}
+
+ItemEnclosure* ItemEnclosure::NewEnclosure(const qlonglong theLength, const qlonglong theBuild, const QString& theVersion, const QUrl& theUrl, const EnclosurePlatform thePlatform, const QByteArray& theSignature, const EnclosureSignatureType theSignatureType, QObject* theParent) {
+
+  ItemEnclosure* enclosure = new ItemEnclosure(theParent);
+
+  enclosure->length = theLength;
+  enclosure->versionBuild = theBuild;
+  enclosure->versionDescription = theVersion;
+  enclosure->fileUrl = theUrl;
+  enclosure->mimeType = "application/octet-stream";
+
+  enclosure->platform = thePlatform;
+
+  enclosure->signature = theSignature;
+  enclosure->signatureType = theSignatureType;
+
+  if (thePlatform == WindowsPlatform) {
+    // InnoSetup
+    enclosure->installerArguments = QStringList{ "/SILENT", "/SP-" };
+    // MSI
+    enclosure->installerArguments = QStringList{ "/SILENT", "/passive" };
+    // NSIS
+    enclosure->installerArguments = QStringList{ "/SILENT", "/S" };
+  }
+
+  return enclosure;
 }
 
 ItemEnclosure::~ItemEnclosure() {
@@ -127,10 +159,10 @@ QString ItemEnclosure::PlatformToDescription(const EnclosurePlatform& thePlatfor
 
   switch (thePlatform) {
     case MacPlatform: {
-      return "macOS";
+      return "mac";
     }
     case WindowsPlatform: {
-      return "Windows";
+      return "windows";
     }
     default: {
       return "";
@@ -140,10 +172,8 @@ QString ItemEnclosure::PlatformToDescription(const EnclosurePlatform& thePlatfor
 
 void ItemEnclosure::Print() const {
 
-//  qDebug() << "ItemEnclosure::Print()";
-
-  qDebug() << QString("File Url: %1").arg(fileUrl.toString(), 20);
-  qDebug().noquote().nospace() << fileUrl.path().section('/', -1);
+  qInfo() << QString("File Url: %1").arg(fileUrl.toString(), 20);
+  qInfo().noquote().nospace() << fileUrl.path().section('/', -1);
 }
 
 
@@ -178,8 +208,56 @@ bool ItemEnclosure::ParseXml() {
   }
 
   platform = PlatformFromXmlValue(enclosureElement.attribute("sparkle:os"));
+  
+  if (enclosureElement.hasAttribute("sparkle:installerArguments")) {
+
+    const QString installerArgumentsStr = enclosureElement.attribute("sparkle:installerArguments");
+
+    if (!installerArgumentsStr.isEmpty()) {
+      installerArguments = installerArgumentsStr.split(' ');
+    }
+  }
 
   return true;
 }
 
 #pragma mark Public
+
+bool ItemEnclosure::Serialize(QDomElement& theEnclosureElement) {
+
+  if (versionBuild < 0) { qWarning().noquote().nospace() << "error serializing enclosure - invalid version: " << versionBuild; return false; }
+  if (platform == NullPlatform) { qWarning().noquote().nospace() << "error serializing enclosure - platform is null"; return false; }
+  if (!fileUrl.isValid()) { qWarning().noquote().nospace() << "error serializing enclosure - invalid url: " << fileUrl.toString(); return false; }
+  if (length <= 0) { qWarning().noquote().nospace() << "error serializing enclosure - invalid length: " << length; return false; }
+  if (signatureType == NullSignature) { qWarning().noquote().nospace() << "error serializing enclosure - signature type is null"; return false; }
+  if (signature.isEmpty()) { qWarning().noquote().nospace() << "error serializing enclosure - empty signature"; return false; }
+
+  theEnclosureElement.setAttribute("sparkle:version", QString::number(versionBuild));
+  if (!versionDescription.isEmpty()) {
+    theEnclosureElement.setAttribute("sparkle:shortVersionString", QString::number(versionBuild));
+  }
+  theEnclosureElement.setAttribute("sparkle:os", PlatformXmlValue());
+
+  theEnclosureElement.setAttribute("url", fileUrl.toString());
+  theEnclosureElement.setAttribute("length", QString::number(length));
+  theEnclosureElement.setAttribute(SignatureTypeXmlKey(), QString::fromUtf8(signature));
+  theEnclosureElement.setAttribute("type", mimeType);
+
+  if (!installerArguments.isEmpty()) {
+    theEnclosureElement.setAttribute("sparkle:installerArguments", installerArguments.join(' '));
+  }
+
+  if (platform == WindowsPlatform) {
+
+    // InnoSetup
+    theEnclosureElement.setAttribute("sparkle:installerArguments", "/SILENT /SP-");
+
+    // MSI
+    //theEnclosureElement.setAttribute("sparkle:installerArguments", "/passive");
+
+    // NSIS
+    //theEnclosureElement.setAttribute("sparkle:installerArguments", "/S");
+  }
+
+  return true;
+}

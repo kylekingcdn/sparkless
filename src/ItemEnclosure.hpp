@@ -36,6 +36,7 @@ private:
   EnclosureSignatureType signatureType = NullSignature;
 
   EnclosurePlatform platform = NullPlatform;
+  QStringList installerArguments;
 
 
 #pragma mark - Constructors -
@@ -43,12 +44,15 @@ private:
 #pragma mark Protected
 protected:
 
+  ItemEnclosure(QObject* theParent = nullptr);
   ItemEnclosure(const QDomElement&, QObject* theParent = nullptr);
 
 #pragma mark Public
 public:
 
   static ItemEnclosure* FromElement(const QDomElement&, QObject* theParent = nullptr);
+
+  static ItemEnclosure* NewEnclosure(const qlonglong theLength, const qlonglong theBuild, const QString& theVersion, const QUrl& theUrl, const EnclosurePlatform thePlatform, const QByteArray& theSignature, const EnclosureSignatureType theSignatureType, QObject* theParent = nullptr);
 
   virtual ~ItemEnclosure() Q_DECL_OVERRIDE;
 
@@ -81,6 +85,7 @@ public:
   EnclosurePlatform Platform() const { return platform; }
   QString PlatformXmlValue() const { return PlatformToXmlValue(platform); }
   QString PlatformDescription() const { return PlatformToDescription(platform); }
+  const QStringList& InstallerArguments() const { return installerArguments; }
 
   static EnclosureSignatureType SignatureTypeFromXmlKey(const QString&);
   static QString SignatureTypeToXmlKey(const EnclosureSignatureType);
@@ -103,7 +108,8 @@ protected:
 #pragma mark Public
 public:
 
-
+  bool Serialize(QDomElement& theEnclosureElement);
+  
 };
 
 #endif /* ItemEnclosure_hpp */

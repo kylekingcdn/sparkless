@@ -48,7 +48,7 @@ void ItemDelta::Print() const {
 
   ItemEnclosure::Print();
 
-  qDebug().noquote().nospace() << "Delta Version Intitial: " << initialVersionBuild;
+  qInfo().noquote().nospace() << "Delta Version Intitial: " << initialVersionBuild;
 }
 
 

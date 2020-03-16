@@ -6,7 +6,7 @@
 //  Copyright © 2020 Kyle King. All rights reserved.
 //
 
-#include "DmgMounter.hpp"
+#include "utils/DmgMounter.hpp"
 
 #include <QCoreApplication>
 #include <QDir>
@@ -17,9 +17,14 @@
 
 #pragma mark Public
 
-DmgMounter::DmgMounter(const QString& theImagePath, const QString& theMountPoint)
-: imagePath(theImagePath), mountPoint(theMountPoint) {
+DmgMounter::DmgMounter() {
 
+}
+
+DmgMounter::DmgMounter(const QString& theImagePath, const QString& theMountPoint) {
+
+  SetImagePath(theImagePath);
+  SetMountPoint(theMountPoint);
 }
 
 
@@ -27,16 +32,43 @@ DmgMounter::DmgMounter(const QString& theImagePath, const QString& theMountPoint
 
 #pragma mark Private
 
+QString DmgMounter::HdiutilPath() {
+
+  return QString("/usr/bin/hdiutil");
+}
+
 
 #pragma mark - Mutators -
 
-#pragma mark Private
+void DmgMounter::SetImagePath(const QString& thePath) {
+
+  imagePath = thePath;
+}
+
+void DmgMounter::SetMountPoint(const QString& theMountPoint) {
+
+  mountPoint = theMountPoint;
+}
 
 #pragma mark Public
 
 bool DmgMounter::Mount() {
 
-  const QString hdiutilPath = "/usr/bin/hdiutil";
+  const QString hdiutilPath = HdiutilPath();
+
+  if (!QFileInfo::exists(hdiutilPath)) {
+    qFatal("Could not find hdiutil program at expected path: %s", hdiutilPath.toLatin1().constData());
+    return false;
+  }
+  if (!QFileInfo::exists(imagePath)) {
+    qWarning() << "Error mounting dmg - image not found: " << imagePath;
+    return false;
+  }
+  if (!QFileInfo::exists(mountPoint)) {
+    qWarning() << "Error mounting dmg - mount point not found: " << mountPoint;
+    return false;
+  }
+
   const QStringList hdiutilArgs = {
     "attach",
     "-nobrowse",
@@ -53,29 +85,39 @@ bool DmgMounter::Mount() {
   hdiutilProcess.start();
 
   if (!hdiutilProcess.waitForStarted(-1)) {
-    return false;
+    success = false;
   }
 
-  if (!hdiutilProcess.waitForFinished(-1)) {
-    return false;
+  else if (!hdiutilProcess.waitForFinished(-1)) {
+    success = false;
   }
 
-  commandOutput = hdiutilProcess.readAllStandardOutput();
-
-  if (hdiutilProcess.exitStatus() == QProcess::NormalExit) {
-    mounted = true;
-    return true;
-  }
   else {
-    return false;
+
+    commandOutput = hdiutilProcess.readAllStandardOutput();
+
+    if (hdiutilProcess.exitStatus() == QProcess::NormalExit) {
+      mounted = true;
+      success =  true;
+    }
+    else {
+      success = false;
+    }
   }
+
+  return success;
 }
 
 bool DmgMounter::Unmount() {
 
-  const QString hdiutilPath = "/usr/bin/hdiutil";
+   const QString hdiutilPath = HdiutilPath();
+
   if (!QFileInfo::exists(hdiutilPath)) {
-    commandOutput = "could not find hdiutil program: " + hdiutilPath.toUtf8();
+    qFatal("Could not find hdiutil program at expected path: %s", hdiutilPath.toLatin1().constData());
+    return false;
+  }
+  if (!QFileInfo::exists(mountPoint)) {
+    qWarning() << "Error unmounting dmg - mount point not found: " << mountPoint;
     return false;
   }
 
@@ -92,22 +134,32 @@ bool DmgMounter::Unmount() {
   hdiutilProcess.start();
 
   if (!hdiutilProcess.waitForStarted(-1)) {
-    return false;
+    qWarning() << "waitForStarted() failed for hdiutil unmount";
+    success = false;
   }
 
-  if (!hdiutilProcess.waitForFinished(-1)) {
-    return false;
+  else if (!hdiutilProcess.waitForFinished(-1)) {
+    qWarning() << "waitForFinished() failed for hdiutil unmount";
+    success = false;
   }
 
-  commandOutput = hdiutilProcess.readAllStandardOutput();
-
-  mounted = false;
-
-  if (hdiutilProcess.exitStatus() == QProcess::NormalExit) {
-    mounted = false;
-    return true;
-  }
   else {
-    return false;
+
+    commandOutput = hdiutilProcess.readAllStandardOutput();
+
+    if (hdiutilProcess.exitStatus() == QProcess::NormalExit) {
+      mounted = false;
+      success =  true;
+    }
+    else {
+      qWarning().noquote().nospace() << "hdiutil unmount had a non-zero exit code - output: " << commandOutput;
+      success = false;
+    }
   }
+
+  if (!success) {
+    qWarning() << "hdiutil unmount failed";
+  }
+
+  return success;
 }

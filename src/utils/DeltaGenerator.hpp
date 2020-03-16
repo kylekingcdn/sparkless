@@ -17,11 +17,10 @@ private:
 
   QString newAppPath;
   QString oldAppPath;
-
   QString deltaPath;
 
-  QByteArray commandOutput;
   bool success = false;
+  QByteArray commandOutput;
 
 
 #pragma mark - Constructors -
@@ -37,8 +36,7 @@ public:
 #pragma mark Private
 private:
 
-  static QString ScriptsDir();
-  static QString GenerateDeltaScriptPath();
+  static QString GenerateDeltaProgramPath();
 
 #pragma mark Public
 public:

@@ -6,10 +6,11 @@
 //  Copyright © 2020 Kyle King. All rights reserved.
 //
 
-#include "DeltaGenerator.hpp"
+#include "utils/DeltaGenerator.hpp"
+#include "Constants.hpp"
 
 #include <QCoreApplication>
-#include <QDir>
+#include <QFileInfo>
 #include <QDebug>
 #include <QProcess>
 
@@ -28,18 +29,9 @@ DeltaGenerator::DeltaGenerator(const QString& theOldAppPath, const QString& theN
 
 #pragma mark Private
 
-QString DeltaGenerator::ScriptsDir() {
+QString DeltaGenerator::GenerateDeltaProgramPath() {
 
-#ifdef DEBUG
-  return QDir::currentPath();
-#endif
-
-  return qApp->applicationDirPath();
-}
-
-QString DeltaGenerator::GenerateDeltaScriptPath() {
-
-  return QString("%1/%2").arg(ScriptsDir(), "BinaryDelta");
+  return QString("%1/%2").arg(HelperScriptsDir(), "BinaryDelta");
 }
 
 #pragma mark - Mutators -
@@ -50,7 +42,25 @@ QString DeltaGenerator::GenerateDeltaScriptPath() {
 
 bool DeltaGenerator::GenerateDelta() {
 
-  const QString generateProcessPath = GenerateDeltaScriptPath();
+  const QString generateDeltaPath = GenerateDeltaProgramPath();
+
+    if (!QFileInfo::exists(generateDeltaPath)) {
+    qFatal("Could not find delta generator program at expected path: %s", generateDeltaPath.toLatin1().constData());
+    return false;
+  }
+  if (!QFileInfo::exists(oldAppPath)) {
+    qWarning() << "Error generating delta - old app not found at path: " << oldAppPath;
+    return false;
+  }
+  if (!QFileInfo::exists(newAppPath)) {
+    qWarning() << "Error generating delta - new app not found at path: " << newAppPath;
+    return false;
+  }
+  if (QFileInfo::exists(deltaPath)) {
+    qWarning() << "Error generating delta - delta already exists at path: " << deltaPath;
+    return false;
+  }
+
   const QStringList generateArgs = {
     "create",
     "--verbose",
@@ -59,28 +69,40 @@ bool DeltaGenerator::GenerateDelta() {
     deltaPath,
   };
 
-  if (!QFileInfo::exists(generateProcessPath)) {
-    commandOutput = "could not find BinaryDelta program: " + generateProcessPath.toUtf8();
-    return false;
-  }
+
+  qInfo().noquote().nospace() << "Generating delta for bundles: '" << oldAppPath << "' and '" << newAppPath << "'";
 
   QProcess generateProcess;
-  generateProcess.setProgram(generateProcessPath);
+  generateProcess.setProgram(generateDeltaPath);
   generateProcess.setArguments(generateArgs);
-
-  qDebug() << "GenerateDelta() executing '" << generateProcess.program() << " " << generateProcess.arguments().join(' ') << "'";
+  qDebug().nospace().noquote() << "GenerateDelta() executing: " << generateProcess.program() << " " << generateProcess.arguments().join(' ');
   generateProcess.start();
 
   if (!generateProcess.waitForStarted(-1)) {
-
-    return false;
+    qWarning() << "waitForStarted() failed for:" << generateDeltaPath;
+    success = false;
+  }
+  else if (!generateProcess.waitForFinished(-1)) {
+    qWarning() << "waitForFinished() failed for:" << generateDeltaPath;
+    success = false;
   }
 
-  if (!generateProcess.waitForFinished(-1)) {
-    return false;
+  else {
+
+    commandOutput = generateProcess.readAllStandardOutput();
+
+    if (generateProcess.exitStatus() == QProcess::NormalExit) {
+      success = true;
+    }
+    else {
+      qWarning().noquote().nospace() << "BinaryDelta had a non-zero exit code - output: " << commandOutput;
+      success = false;
+    }
   }
 
-  commandOutput = generateProcess.readAllStandardOutput();
+  if (!success) {
+    qWarning() << "generate delta program failed";
+  }
 
-  return generateProcess.exitStatus() == QProcess::NormalExit;
+  return success;
 }

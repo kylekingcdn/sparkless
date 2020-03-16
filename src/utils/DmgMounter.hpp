@@ -20,6 +20,7 @@ private:
 
   bool mounted = false;
 
+  bool success = false;
   QByteArray commandOutput;
 
 
@@ -28,6 +29,7 @@ private:
 #pragma mark Public
 public:
 
+  DmgMounter();
   DmgMounter(const QString& theImagePath, const QString& theMountPoint);
 
 
@@ -35,6 +37,8 @@ public:
 
 #pragma mark Private
 private:
+
+  static QString HdiutilPath();
 
 
 #pragma mark Public
@@ -45,16 +49,17 @@ public:
 
   bool Mounted() const { return mounted; }
 
+  bool Success() const { return success; }
   QByteArray CommandOutput() const { return commandOutput; }
 
 
 #pragma mark - Mutators -
 
-#pragma mark Private
-private:
-
 #pragma mark Public
 public:
+
+  void SetImagePath(const QString&);
+  void SetMountPoint(const QString&);
 
   bool Mount();
   bool Unmount();

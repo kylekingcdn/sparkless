@@ -9,7 +9,6 @@
 #include <QCoreApplication>
 #include <unistd.h>
 
-#include "Enclosure.hpp"
 #include "Appcast.hpp"
 #include "AppcastItem.hpp"
 #include "ItemEnclosure.hpp"
@@ -21,48 +20,7 @@
 #include <QCommandLineParser>
 #include <QFile>
 #include <QDomDocument>
-
-
-QDomElement ItemNodeForBuildNumber(const int theVersion, QDomElement channelNode) {
-
-  QDomElement itemNode = channelNode.firstChildElement("item");
-
-  while (!itemNode.isNull()) {
-
-    QDomElement enclosureNode = itemNode.firstChildElement("enclosure");
-    if (!enclosureNode.isNull() && enclosureNode.attribute("sparkle:version").toInt() == theVersion) { return itemNode; }
-
-    itemNode = itemNode.nextSiblingElement("item");
-  }
-
-  return QDomElement();
-}
-
-QDomElement EnclosureConflict(Enclosure* theEnclosure, const QDomElement channelNode) {
-
-  Q_ASSERT(theEnclosure != nullptr);
-
-  QDomElement itemNode = channelNode.firstChildElement("item");
-
-  while (!itemNode.isNull()) {
-
-    QDomElement enclosureNode = itemNode.firstChildElement("enclosure");
-
-    while (!enclosureNode.isNull()) {
-
-      const int enclosureBuild = enclosureNode.attribute("sparkle:version").toInt();
-      const QString enclosureOS = enclosureNode.attribute("sparkle:os");
-
-      if (enclosureBuild == theEnclosure->BuildNumber() && enclosureOS == theEnclosure->SparklePlatformString()) { return enclosureNode; }
-
-      enclosureNode = enclosureNode.nextSiblingElement("enclosure");
-    }
-
-    itemNode = itemNode.nextSiblingElement("item");
-  }
-
-  return QDomElement();
-}
+#include <QDebug>
 
 int main(int argc, char *argv[]) {
 

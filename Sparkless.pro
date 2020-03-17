@@ -27,5 +27,4 @@ SOURCES += \
   src/Appcast.cpp \
   src/main.cpp
 
-
-
+INCLUDEPATH += src

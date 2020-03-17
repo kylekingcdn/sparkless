@@ -9,6 +9,7 @@
 #include "Constants.hpp"
 
 #include <QDir>
+#include <QCoreApplication>
 
 QString HelperScriptsDir() {
 

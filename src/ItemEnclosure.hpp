@@ -45,6 +45,7 @@ private:
 protected:
 
   ItemEnclosure(QObject* theParent = nullptr);
+  ItemEnclosure(const qlonglong theLength, const qlonglong theBuild, const QString& theVersion, const QUrl& theUrl, const EnclosurePlatform thePlatform, const QByteArray& theSignature, const EnclosureSignatureType theSignatureType, QObject* theParent = nullptr);
   ItemEnclosure(const QDomElement&, QObject* theParent = nullptr);
 
 #pragma mark Public
@@ -108,7 +109,7 @@ protected:
 #pragma mark Public
 public:
 
-  bool Serialize(QDomElement& theEnclosureElement);
+  virtual bool Serialize(QDomElement& theEnclosureElement);
   
 };
 

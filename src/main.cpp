@@ -12,6 +12,7 @@
 #include "Enclosure.hpp"
 #include "Appcast.hpp"
 #include "AppcastItem.hpp"
+#include "ItemEnclosure.hpp"
 #include "utils/DeltaGenerator.hpp"
 #include "utils/DmgMounter.hpp"
 #include "utils/DsaSignatureGenerator.hpp"
@@ -253,6 +254,7 @@ int main(int argc, char *argv[]) {
       return 1;
     }
 
+
     printf("\ndelta generated: %s\n", deltaPath.toUtf8().constData());
     return 0;
   }
@@ -351,8 +353,26 @@ int main(int argc, char *argv[]) {
 
     if (hasMacBundle) {
       if (hasEdDsaKey) {
+
         ItemEnclosure* newMacEnclosure = appcast->AddEnclosureToIem(newItem, macBundlePath, MacPlatform, edDsaKey);
         if (newMacEnclosure == nullptr) { qWarning().noquote().nospace() << "failed to add mac enclosure"; return 1; }
+
+        if (deltasCount >= 1) {
+
+          qInfo().noquote().nospace() << "\nGenerating deltas for build " << versionBuild << "...\n";
+
+          int deltasCreated = 0;
+          qlonglong currBuildNumber = newItem->VersionBuild() - 1;
+
+          while (deltasCreated < deltasCount && currBuildNumber > 0) {
+
+            ItemDelta* newDelta = appcast->CreateDeltaForBuild(currBuildNumber, macBundlePath, newItem, MacPlatform, edDsaKey);
+            if (newDelta != nullptr) {
+              deltasCreated++;
+            }
+            currBuildNumber--;
+          }
+        }
       }
       else if (hasDsaKeyPath) {
         ItemEnclosure* newMacEnclosure = appcast->AddEnclosureToIem(newItem, macBundlePath, MacPlatform, dsaKeyPath);
@@ -366,12 +386,9 @@ int main(int argc, char *argv[]) {
       }
     }
 
-    if (parser.isSet(deltasOption) && !hasMacBundle) {
-
-    }
-
+    qInfo().noquote().nospace() << "\nSaving updated appcast file...";
     if (!appcast->AddItem(newItem)) { qWarning().noquote().nospace() << "failed to add item to appcast xml"; return 1; }
-    if (!appcast->Save(QString(appcastPath).replace(".xml", "-2.xml"))) { qWarning().noquote().nospace() << "failed to save appcast xml"; return 1; }
+    if (!appcast->Save(appcastPath)) { qWarning().noquote().nospace() << "failed to save appcast xml"; return 1; }
 
     newItem->Print();
     

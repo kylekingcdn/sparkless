@@ -106,6 +106,8 @@ public:
   void SetReleaseNotesUrl(const QUrl&);
 
   ItemEnclosure* AddEnclosure(const qlonglong theLength, const QUrl& theUrl, const EnclosurePlatform thePlatform, const QByteArray& theSignature, const EnclosureSignatureType theSignatureType);
+  ItemDelta* AddDelta(const qlonglong prevBuildVersion, const qlonglong theLength, const QUrl& theUrl, const EnclosurePlatform thePlatform, const QByteArray& theSignature, const EnclosureSignatureType theSignatureType);
+
 
   //ItemDelta* AddDelta();
 

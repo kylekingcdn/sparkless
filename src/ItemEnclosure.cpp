@@ -24,6 +24,30 @@ ItemEnclosure::ItemEnclosure(QObject* theParent)
   
 }
 
+ItemEnclosure::ItemEnclosure(const qlonglong theLength, const qlonglong theBuild, const QString& theVersion, const QUrl& theUrl, const EnclosurePlatform thePlatform, const QByteArray& theSignature, const EnclosureSignatureType theSignatureType, QObject* theParent)
+: QObject(theParent) {
+
+  length = theLength;
+  versionBuild = theBuild;
+  versionDescription = theVersion;
+  fileUrl = theUrl;
+  mimeType = "application/octet-stream";
+
+  platform = thePlatform;
+
+  signature = theSignature;
+  signatureType = theSignatureType;
+
+  if (thePlatform == WindowsPlatform) {
+    // InnoSetup
+    installerArguments = QStringList{ "/SILENT", "/SP-" };
+    // MSI
+    installerArguments = QStringList{ "/SILENT", "/passive" };
+    // NSIS
+    installerArguments = QStringList{ "/SILENT", "/S" };
+  }
+}
+
 ItemEnclosure::ItemEnclosure(const QDomElement& theEnclosureElement, QObject* theParent)
 : QObject(theParent) {
 
@@ -46,27 +70,7 @@ ItemEnclosure* ItemEnclosure::FromElement(const QDomElement& theEnclosureElement
 
 ItemEnclosure* ItemEnclosure::NewEnclosure(const qlonglong theLength, const qlonglong theBuild, const QString& theVersion, const QUrl& theUrl, const EnclosurePlatform thePlatform, const QByteArray& theSignature, const EnclosureSignatureType theSignatureType, QObject* theParent) {
 
-  ItemEnclosure* enclosure = new ItemEnclosure(theParent);
-
-  enclosure->length = theLength;
-  enclosure->versionBuild = theBuild;
-  enclosure->versionDescription = theVersion;
-  enclosure->fileUrl = theUrl;
-  enclosure->mimeType = "application/octet-stream";
-
-  enclosure->platform = thePlatform;
-
-  enclosure->signature = theSignature;
-  enclosure->signatureType = theSignatureType;
-
-  if (thePlatform == WindowsPlatform) {
-    // InnoSetup
-    enclosure->installerArguments = QStringList{ "/SILENT", "/SP-" };
-    // MSI
-    enclosure->installerArguments = QStringList{ "/SILENT", "/passive" };
-    // NSIS
-    enclosure->installerArguments = QStringList{ "/SILENT", "/S" };
-  }
+  ItemEnclosure* enclosure = new ItemEnclosure(theLength, theBuild, theVersion, theUrl, thePlatform, theSignature, theSignatureType, theParent);
 
   return enclosure;
 }
@@ -234,7 +238,7 @@ bool ItemEnclosure::Serialize(QDomElement& theEnclosureElement) {
 
   theEnclosureElement.setAttribute("sparkle:version", QString::number(versionBuild));
   if (!versionDescription.isEmpty()) {
-    theEnclosureElement.setAttribute("sparkle:shortVersionString", QString::number(versionBuild));
+    theEnclosureElement.setAttribute("sparkle:shortVersionString", versionDescription);
   }
   theEnclosureElement.setAttribute("sparkle:os", PlatformXmlValue());
 

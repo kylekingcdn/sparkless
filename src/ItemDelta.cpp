@@ -14,6 +14,13 @@
 
 #pragma mark Private
 
+ItemDelta::ItemDelta(const qlonglong theLength, const qlonglong thePrevBuild, const qlonglong theNewBuild, const QString& theVersion, const QUrl& theUrl, const EnclosurePlatform thePlatform, const QByteArray& theSignature, const EnclosureSignatureType theSignatureType, QObject* theParent)
+: ItemEnclosure(theLength, theNewBuild, theVersion, theUrl, thePlatform, theSignature, theSignatureType, theParent) {
+
+  initialVersionBuild = thePrevBuild;
+
+}
+
 ItemDelta::ItemDelta(const QDomElement& theEnclosureElement, QObject* theParent)
 : ItemEnclosure(theEnclosureElement, theParent) {
 
@@ -31,6 +38,13 @@ ItemDelta* ItemDelta::FromElement(const QDomElement& theEnclosureElement, QObjec
   }
 
   return enclsoure;
+}
+
+ItemDelta* ItemDelta::NewDelta(const qlonglong theLength, const qlonglong thePrevBuild, const qlonglong theNewBuild, const QString& theVersion, const QUrl& theUrl, const EnclosurePlatform thePlatform, const QByteArray& theSignature, const EnclosureSignatureType theSignatureType, QObject* theParent) {
+
+  ItemDelta* delta = new ItemDelta(theLength, thePrevBuild, theNewBuild, theVersion, theUrl, thePlatform, theSignature, theSignatureType, theParent);
+
+  return delta;
 }
 
 ItemDelta::~ItemDelta() {
@@ -69,3 +83,14 @@ bool ItemDelta::ParseXml() {
 }
 
 #pragma mark Public
+
+bool ItemDelta::Serialize(QDomElement& theDeltaElement) {
+
+  if (!ItemEnclosure::Serialize(theDeltaElement)) {
+    return false;
+  }
+
+  theDeltaElement.setAttribute("sparkle:deltaFrom", QString::number(initialVersionBuild));
+
+  return true;
+}

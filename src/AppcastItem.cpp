@@ -184,10 +184,21 @@ void AppcastItem::SetReleaseNotesUrl(const QUrl& theUrl) {
 ItemEnclosure* AppcastItem::AddEnclosure(const qlonglong theLength, const QUrl &theUrl, const EnclosurePlatform thePlatform, const QByteArray &theSignature, const EnclosureSignatureType theSignatureType) {
 
   ItemEnclosure* enclosure = ItemEnclosure::NewEnclosure(theLength, versionBuild, versionDescription, theUrl, thePlatform, theSignature, theSignatureType);
-  if (enclosure != nullptr) {
 
+  if (enclosure != nullptr) {
     enclosures.append(enclosure);
   }
 
   return enclosure;
+}
+
+ItemDelta* AppcastItem::AddDelta(const qlonglong prevBuildVersion, const qlonglong theLength, const QUrl& theUrl, const EnclosurePlatform thePlatform, const QByteArray& theSignature, const EnclosureSignatureType theSignatureType) {
+
+  ItemDelta* delta = ItemDelta::NewDelta(theLength, prevBuildVersion, versionBuild, versionDescription, theUrl, thePlatform, theSignature, theSignatureType);
+
+  if (delta != nullptr) {
+    deltas.append(delta);
+  }
+
+  return delta;
 }

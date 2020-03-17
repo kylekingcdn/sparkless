@@ -16,6 +16,7 @@
 #include "Constants.hpp"
 
 class ItemEnclosure;
+class ItemDelta;
 class AppcastItem;
 
 class Appcast : public QObject {
@@ -59,6 +60,8 @@ public:
 #pragma mark Private
 private:
 
+  QString TemporaryMountDirForBuild(const qlonglong);
+
 #pragma mark Public
 public:
 
@@ -72,6 +75,7 @@ public:
   const QString& S3BucketName() const { return s3BucketName; }
   const QString& S3BucketDir() const { return s3BucketDir; }
   const QString& S3LocalMirrorPath() const { return s3LocalMirrorPath; }
+  const QString S3BaseUrl() const;
 
   const QString& UrlPrefix() const { return urlPrefix; }
 
@@ -79,6 +83,10 @@ public:
   bool ContainsEnclosure(const qlonglong theBuildVersion, const EnclosurePlatform) const;
 
   const QString UrlForRelease(const QString& theReleaseFileName, const EnclosurePlatform thePlatform) const;
+  const QString UrlForDelta(const QString& theDeltaFileName, const qlonglong theNewBuildVersion, const EnclosurePlatform thePlatform) const;
+
+  const QString MapRemoteUrlToLocalMirrorPath(const QString&) const;
+  const QString MapLocalMirrorPathToRemoteUrl(const QString&) const;
 
   void PrintItems() const;
 
@@ -103,8 +111,12 @@ public:
   void SetUrlPrefix(const QString&);
 
   AppcastItem* CreateItem(const QString& theVersionDescription, const qlonglong theVersionBuild);
+  ItemDelta* CreateDeltaForBuild(const qlonglong theOldBuildNumber, const QString theNewReleasePath, AppcastItem* theNewItem, const EnclosurePlatform thePlatform, const QByteArray& theEdDsaKey);
+
   ItemEnclosure* AddEnclosureToIem(AppcastItem* theItem, const QString& theFilePath, const EnclosurePlatform thePlatform, const QString& theDsaKeyPath);
   ItemEnclosure* AddEnclosureToIem(AppcastItem* theItem, const QString& theFilePath, const EnclosurePlatform thePlatform, const QByteArray& theEdDsaKey);
+
+  ItemDelta* AddDeltaToIem(AppcastItem* theItem, const qlonglong thePrevVersion, const QString& theFilePath, const QByteArray& theEdDsaKey);
 
   bool Save(const QString& theFilePath);
 

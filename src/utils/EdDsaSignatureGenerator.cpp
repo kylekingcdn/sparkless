@@ -82,7 +82,7 @@ bool EdDsaSignatureGenerator::GenerateSignature() {
   QProcess generateProcess;
   generateProcess.setProgram(generatePath);
   generateProcess.setArguments(generateArgs);
-  qDebug().noquote().nospace() << "EdDsaSignatureGenerator::GenerateSignature() executing '" << generateProcess.program() << " " << generateProcess.arguments().join(' ') << "'";
+//  qDebug().noquote().nospace() << "EdDsaSignatureGenerator::GenerateSignature() executing '" << generateProcess.program() << " " << generateProcess.arguments().join(' ') << "'";
   generateProcess.start();
 
   if (!generateProcess.waitForStarted(-1)) {

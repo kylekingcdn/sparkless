@@ -81,7 +81,7 @@ bool DmgMounter::Mount() {
   hdiutilProcess.setProgram(hdiutilPath);
   hdiutilProcess.setArguments(hdiutilArgs);
 
-  qDebug().noquote().nospace() << "Mount() executing '" << hdiutilProcess.program() << " " << hdiutilProcess.arguments().join(' ') << "'";
+//  qDebug().noquote().nospace() << "Mount() executing '" << hdiutilProcess.program() << " " << hdiutilProcess.arguments().join(' ') << "'";
   hdiutilProcess.start();
 
   if (!hdiutilProcess.waitForStarted(-1)) {
@@ -130,7 +130,7 @@ bool DmgMounter::Unmount() {
   hdiutilProcess.setProgram(hdiutilPath);
   hdiutilProcess.setArguments(hdiutilArgs);
 
-  qDebug().noquote().nospace() << "Unmount() executing '" << hdiutilProcess.program() << " " << hdiutilProcess.arguments().join(' ') << "'";
+//  qDebug().noquote().nospace() << "Unmount() executing '" << hdiutilProcess.program() << " " << hdiutilProcess.arguments().join(' ') << "'";
   hdiutilProcess.start();
 
   if (!hdiutilProcess.waitForStarted(-1)) {

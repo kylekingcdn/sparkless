@@ -70,12 +70,12 @@ bool DeltaGenerator::GenerateDelta() {
   };
 
 
-  qInfo().noquote().nospace() << "Generating delta for bundles: '" << oldAppPath << "' and '" << newAppPath << "'";
+//  qInfo().noquote().nospace() << "Generating delta for bundles: '" << oldAppPath << "' and '" << newAppPath << "'";
 
   QProcess generateProcess;
   generateProcess.setProgram(generateDeltaPath);
   generateProcess.setArguments(generateArgs);
-  qDebug().nospace().noquote() << "GenerateDelta() executing: " << generateProcess.program() << " " << generateProcess.arguments().join(' ');
+//  qDebug().nospace().noquote() << "GenerateDelta() executing: " << generateProcess.program() << " " << generateProcess.arguments().join(' ');
   generateProcess.start();
 
   if (!generateProcess.waitForStarted(-1)) {

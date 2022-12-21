@@ -8,13 +8,11 @@
 
 #include <QCoreApplication>
 #include <QDir>
-//#include <unistd.h>
 
 #include "Appcast.hpp"
 #include "AppcastItem.hpp"
 #include "ItemEnclosure.hpp"
 #include "utils/DeltaGenerator.hpp"
-#include "utils/DmgMounter.hpp"
 #include "utils/DsaSignatureGenerator.hpp"
 #include "utils/EdDsaSignatureGenerator.hpp"
 
@@ -27,7 +25,7 @@ int main(int argc, char *argv[]) {
 
   QCoreApplication a(argc, argv);
   a.setApplicationName("Sparkless");
-  a.setApplicationVersion("2.0.0");
+  a.setApplicationVersion("2.1.0");
 
 
   /* -------- Command Line Specs -------- */
@@ -60,13 +58,12 @@ int main(int argc, char *argv[]) {
   QCommandLineOption s3BucketDirOption("s3-bucket-dir", "The diectory inside the s3 bucket (used for url generation)", "bucket_dir");
   QCommandLineOption s3MirrorPathOption("s3-mirror-path", "The file path to the local mirror of the s3 bucket dir [required for automatic delta generation, requires other s3 options to be set]", "num_deltas");
 
-  QCommandLineOption urlPrefixOption("url-prefix", "The url (without the filename) to be used for the appcast URL generation. This is an alternative ", "url_without_filename");
+  QCommandLineOption urlPrefixOption("url-prefix", "The url (without the filename) to be used for the appcast URL generation", "url_without_filename");
 
   /* ---- delta ---- */
 
   QCommandLineOption previousBundleOption("prev-bundle", "The local file path to the previous app/dmg/zip [required for delta command]", "bundle_path");
   QCommandLineOption deltaPathOption("delta-path", "The local file path for the output delta file [required for delta command]", "delta_path");
-
 
   // add options
   if (qApp->arguments().contains("add")) {
@@ -106,7 +103,7 @@ int main(int argc, char *argv[]) {
   QString command;
 
   if (!parser.positionalArguments().isEmpty()) {
-    command = parser.positionalArguments().first();
+    command = parser.positionalArguments().at(0);
   }
 
   /* ---- Print ---- */
@@ -116,7 +113,7 @@ int main(int argc, char *argv[]) {
 //    parser.process(a);
 
     if (!parser.isSet(appcastOption)) {
-      qCritical().noquote().nospace() << "Missing required option '--"<<appcastOption.names().first()<<"'.";
+      qCritical().noquote().nospace() << "Missing required option '--appcast'";
       return 1;
     }
 
@@ -133,41 +130,36 @@ int main(int argc, char *argv[]) {
   /* ---- Sign ---- */
   else if (command == "sign") {
 
-    bool hasMacBundle = parser.isSet(macBundleOption);
-    bool hasWindowsBundle = parser.isSet(windowsBundleOption);
-    bool hasEdDsaKey = parser.isSet(edDsaKeyOption);
-    bool hasDsaKeyPath = parser.isSet(dsaKeyFilePathOption);
-
-    if (!hasMacBundle && !hasWindowsBundle) {
-      qCritical().noquote().nospace() << "`sign` requires '--"<<macBundleOption.names().first()<<"' and/or '--"<<windowsBundleOption.names().first()<<"'.";
+    if (!parser.isSet(macBundleOption) && !parser.isSet(windowsBundleOption)) {
+      qCritical().noquote().nospace() << "`sign` requires '--mac-bundle' and/or '--windows-bundle'";
       return 1;
     }
 
-    if (!hasEdDsaKey && !hasDsaKeyPath) {
-      qCritical().noquote().nospace() << "`sign` requires either '--"<<edDsaKeyOption.names().first()<<"' and/or '--"<<dsaKeyFilePathOption.names().first()<<"'.";
+    if (!parser.isSet(edDsaKeyOption) && !parser.isSet(dsaKeyFilePathOption)) {
+      qCritical().noquote().nospace() << "`sign` requires either '--eddsa-key' and/or '--dsa-key-path'";
       return 1;
     }
 
-    if (hasWindowsBundle && !hasDsaKeyPath) {
-      qCritical().noquote().nospace() << "Windows bundles require a dsa signature. Please specify one with '--"<<dsaKeyFilePathOption.names().first()<<"'.";
+    if (parser.isSet(windowsBundleOption) && !parser.isSet(dsaKeyFilePathOption)) {
+      qCritical().noquote().nospace() << "Windows bundles require a dsa signature. Please specify one with '--dsa-key-path'";
       return 1;
     }
 
-    const QString macBundlePath = hasMacBundle ? parser.value(macBundleOption) : QString();
-    const QString windowsBundlePath = hasWindowsBundle ? parser.value(windowsBundleOption) : QString();
-    const QByteArray edDsaKey = hasEdDsaKey ? parser.value(edDsaKeyOption).toUtf8() : QByteArray();
-    const QString dsaKeyPath = hasDsaKeyPath ? parser.value(dsaKeyFilePathOption) : QString();
+    const QString macBundlePath = parser.value(macBundleOption);
+    const QString windowsBundlePath = parser.value(windowsBundleOption);
+    const QByteArray edDsaKey = parser.isSet(edDsaKeyOption) ? parser.value(edDsaKeyOption).toUtf8() : QByteArray();
+    const QString dsaKeyPath = parser.value(dsaKeyFilePathOption);
 
-    if (hasMacBundle) {
+    if (parser.isSet(macBundleOption)) {
 
-      if (hasEdDsaKey) {
+      if (parser.isSet(edDsaKeyOption)) {
         EdDsaSignatureGenerator sigGenerator(macBundlePath, edDsaKey);
         if (!sigGenerator.Success()) {
           return 1;
         }
         printf("\n%s [Ed25519]: %s\n", macBundlePath.section('/', -1).toUtf8().constData(), sigGenerator.Signature().constData());
       }
-      else if (hasDsaKeyPath) {
+      else if (parser.isSet(dsaKeyFilePathOption)) {
         qDebug() << "dsa key path: " << dsaKeyPath;
         DsaSignatureGenerator sigGenerator(macBundlePath, dsaKeyPath);
         if (!sigGenerator.Success()) {
@@ -177,7 +169,7 @@ int main(int argc, char *argv[]) {
       }
     }
 
-    if (hasWindowsBundle) {
+    if (parser.isSet(windowsBundleOption)) {
       DsaSignatureGenerator sigGenerator(windowsBundlePath, dsaKeyPath);
       if (!sigGenerator.Success()) {
         return 1;
@@ -192,15 +184,15 @@ int main(int argc, char *argv[]) {
   else if (command == "delta") {
 
     if (!parser.isSet(macBundleOption)) {
-      qCritical().noquote().nospace() << "`delta` requires '--"<<macBundleOption.names().first()<<"'.";
+      qCritical().noquote().nospace() << "`delta` requires '--mac-bundle'";
       return 1;
     }
     if (!parser.isSet(previousBundleOption)) {
-      qCritical().noquote().nospace() << "`delta` requires '--"<<previousBundleOption.names().first()<<"'.";
+      qCritical().noquote().nospace() << "`delta` requires '--prev-bundle'";
       return 1;
     }
     if (!parser.isSet(deltaPathOption)) {
-      qCritical().noquote().nospace() << "`delta` requires '--"<<deltaPathOption.names().first()<<"'.";
+      qCritical().noquote().nospace() << "`delta` requires '--delta-path'";
       return 1;
     }
 
@@ -213,7 +205,6 @@ int main(int argc, char *argv[]) {
       return 1;
     }
 
-
     printf("\ndelta generated: %s\n", deltaPath.toUtf8().constData());
     return 0;
   }
@@ -225,68 +216,63 @@ int main(int argc, char *argv[]) {
 
 //    parser.process(a);
 
-    bool hasMacBundle = parser.isSet(macBundleOption);
-    bool hasWindowsBundle = parser.isSet(windowsBundleOption);
-    bool hasEdDsaKey = parser.isSet(edDsaKeyOption);
-    bool hasDsaKeyPath = parser.isSet(dsaKeyFilePathOption);
-
-    if (!hasMacBundle && !hasWindowsBundle) {
-      qCritical().noquote().nospace() << "`add` requires '--"<<macBundleOption.names().first()<<"' and/or '--"<<windowsBundleOption.names().first()<<"'.";
+    if (!parser.isSet(macBundleOption) && !parser.isSet(windowsBundleOption)) {
+      qCritical().noquote().nospace() << "`add` requires '--mac-bundle' and/or '--windows-bundle'";
       return 1;
     }
 
-    if (!hasEdDsaKey && !hasDsaKeyPath) {
-      qCritical().noquote().nospace() << "`add` requires either '--"<<edDsaKeyOption.names().first()<<"' and/or '--"<<dsaKeyFilePathOption.names().first()<<"'.";
+    if (!parser.isSet(edDsaKeyOption) && !parser.isSet(dsaKeyFilePathOption)) {
+      qCritical().noquote().nospace() << "`add` requires either '--eddsa-key' and/or '--dsa-key-path'";
       return 1;
     }
 
-    if (hasWindowsBundle && !hasDsaKeyPath) {
-      qCritical().noquote().nospace() << "Windows bundles require a DSA signature. Please specify one with '--"<<dsaKeyFilePathOption.names().first()<<"'.";
+    if (parser.isSet(windowsBundleOption) && !parser.isSet(dsaKeyFilePathOption)) {
+      qCritical().noquote().nospace() << "Windows bundles require a DSA signature. Please specify one with '--dsa-key-path'";
       return 1;
     }
 
     if (!parser.isSet(versionBuildOption)) {
-      qCritical().noquote().nospace() << "`add` requires '--"<<versionBuildOption.names().first()<<"'.";
+      qCritical().noquote().nospace() << "`add` requires '--build'";
       return 1;
     }
     if (!parser.isSet(versionStringOption)) {
-      qCritical().noquote().nospace() << "`add` requires '--"<<versionStringOption.names().first()<<"'.";
+      qCritical().noquote().nospace() << "`add` requires '--version'";
       return 1;
     }
     if (!parser.isSet(urlPrefixOption) && (!parser.isSet(s3RegionOption) || !parser.isSet(s3BucketOption))) {
-      qCritical().noquote().nospace() << "`add` requires either '--"<<urlPrefixOption.names().first()<<"' or '--"<<s3RegionOption.names().first()<<"' and '--"<<s3BucketOption.names().first()<<"'.";
+      qCritical().noquote().nospace() << "`add` requires either '--url-prefix' or '--s3-region' and '--s3-bucket'";
       return 1;
     }
 
     // validate delta requiremements
     if (parser.isSet(deltasOption)) {
-      if (!hasMacBundle) {
-        qCritical().noquote().nospace() << "`add` option '--"<<deltasOption.names().first()<<"' is only available for mac bundles'";
+      if (!parser.isSet(macBundleOption)) {
+        qCritical().noquote().nospace() << "`add` option '--deltas' is only available for mac bundles'";
         return 1;
       }
-      if (!hasEdDsaKey) {
-        qCritical().noquote().nospace() << "`add` option '--"<<deltasOption.names().first()<<"' requires a EdDsa signature. Please specify one with '--"<<edDsaKeyOption.names().first()<<"'.";
+      if (!parser.isSet(edDsaKeyOption)) {
+        qCritical().noquote().nospace() << "`add` option '--deltas' requires an EdDsa signature. Please specify one with '--eddsa-key'";
         return 1;
       }
       if (!parser.isSet(s3MirrorPathOption)) {
-        qCritical().noquote().nospace() << "`add` option '--"<<deltasOption.names().first()<<"' requires a local s3 mirror path. Please specify one with '--"<<s3MirrorPathOption.names().first()<<"'.";
+        qCritical().noquote().nospace() << "`add` option '--deltas' requires a local s3 mirror path. Please specify one with '--s3-mirror-path'";
         return 1;
       }
     }
 
     const int deltasCount = parser.value(deltasOption).toInt();
     if (parser.isSet(deltasOption) && QString::number(deltasCount) != parser.value(deltasOption)) {
-      qCritical().nospace().noquote() << "invalid value for option '--"<<deltasOption.names().first()<<"'. Please specify a number > 0'";
+      qCritical().nospace().noquote() << "invalid value for option '--deltas'. Please specify a number > 0'";
       return 1;
     }
     const QString versionString = parser.value(versionStringOption);
     const qlonglong versionBuild = parser.value(versionBuildOption).toLongLong();
 
-    const QString macBundlePath = hasMacBundle ? QDir::fromNativeSeparators(parser.value(macBundleOption)) : QString();
-    const QString windowsBundlePath = hasWindowsBundle ? QDir::fromNativeSeparators(parser.value(windowsBundleOption)) : QString();
+    const QString macBundlePath = parser.isSet(macBundleOption) ? QDir::fromNativeSeparators(parser.value(macBundleOption)) : QString();
+    const QString windowsBundlePath = parser.isSet(windowsBundleOption) ? QDir::fromNativeSeparators(parser.value(windowsBundleOption)) : QString();
 
-    const QByteArray edDsaKey = hasEdDsaKey ? parser.value(edDsaKeyOption).toUtf8() : QByteArray();
-    const QString dsaKeyPath = hasDsaKeyPath ? QDir::fromNativeSeparators(parser.value(dsaKeyFilePathOption)) : QString();
+    const QByteArray edDsaKey = parser.isSet(edDsaKeyOption) ? parser.value(edDsaKeyOption).toUtf8() : QByteArray();
+    const QString dsaKeyPath = parser.isSet(dsaKeyFilePathOption) ? QDir::fromNativeSeparators(parser.value(dsaKeyFilePathOption)) : QString();
 
     const QString appcastPath = QDir::fromNativeSeparators(parser.value(appcastOption));
     Appcast* appcast = Appcast::FromPath(appcastPath);
@@ -310,8 +296,8 @@ int main(int argc, char *argv[]) {
 
     AppcastItem* newItem = appcast->CreateItem(versionString, versionBuild);
 
-    if (hasMacBundle) {
-      if (hasEdDsaKey) {
+    if (parser.isSet(macBundleOption)) {
+      if (parser.isSet(edDsaKeyOption)) {
 
         ItemEnclosure* newMacEnclosure = appcast->AddEnclosureToIem(newItem, macBundlePath, MacPlatform, edDsaKey);
         if (newMacEnclosure == nullptr) { qWarning().noquote().nospace() << "failed to add mac enclosure"; return 1; }
@@ -333,13 +319,13 @@ int main(int argc, char *argv[]) {
           }
         }
       }
-      else if (hasDsaKeyPath) {
+      else if (parser.isSet(dsaKeyFilePathOption)) {
         ItemEnclosure* newMacEnclosure = appcast->AddEnclosureToIem(newItem, macBundlePath, MacPlatform, dsaKeyPath);
         if (newMacEnclosure == nullptr) { qWarning().noquote().nospace() << "failed to add mac enclosure"; return 1; }
       }
     }
-    if (hasWindowsBundle) {
-      if (hasDsaKeyPath) {
+    if (parser.isSet(windowsBundleOption)) {
+      if (parser.isSet(dsaKeyFilePathOption)) {
         ItemEnclosure* newWindowsEnclosure = appcast->AddEnclosureToIem(newItem, windowsBundlePath, WindowsPlatform, dsaKeyPath);
         if (newWindowsEnclosure == nullptr) { qWarning().noquote().nospace() << "failed to add windows enclosure"; return 1; }
       }

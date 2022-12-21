@@ -14,31 +14,16 @@
 #include <QDebug>
 #include <QProcess>
 
-#pragma mark - Constructors -
-
-#pragma mark Public
-
 DeltaGenerator::DeltaGenerator(const QString& theOldAppPath, const QString& theNewAppPath, const QString& theDeltaPath)
 : oldAppPath(theOldAppPath), newAppPath(theNewAppPath), deltaPath(theDeltaPath) {
 
   success = GenerateDelta();
 }
 
-
-#pragma mark - Accessors -
-
-#pragma mark Private
-
 QString DeltaGenerator::GenerateDeltaProgramPath() {
 
   return QString("%1/%2").arg(HelperScriptsDir(), "BinaryDelta");
 }
-
-#pragma mark - Mutators -
-
-#pragma mark Private
-
-#pragma mark Public
 
 bool DeltaGenerator::GenerateDelta() {
 

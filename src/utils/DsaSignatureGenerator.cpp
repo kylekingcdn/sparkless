@@ -13,9 +13,7 @@
 #include <QProcess>
 #include <QFileInfo>
 
-#pragma mark - Constructors -
-
-#pragma mark Public
+#include "Constants.hpp"
 
 DsaSignatureGenerator::DsaSignatureGenerator() {
 
@@ -29,20 +27,10 @@ DsaSignatureGenerator::DsaSignatureGenerator(const QString& theBinaryPath, const
   GenerateSignature();
 }
 
-
-#pragma mark - Accessors -
-
-#pragma mark Private
-
 QString DsaSignatureGenerator::GenerateSignatureProgramPath() {
 
   return QString("%1/%2").arg(HelperScriptsDir(), "sign_update.bat");
 }
-
-
-#pragma mark - Mutators -
-
-#pragma mark Public
 
 void DsaSignatureGenerator::SetBinaryPath(const QString& thePath) {
 

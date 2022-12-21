@@ -22,23 +22,14 @@ private:
   bool success = false;
   QByteArray commandOutput;
 
-
-#pragma mark - Constructors -
-
-#pragma mark Public
 public:
 
   DeltaGenerator(const QString& theOldAppPath, const QString& theNewAppPath, const QString& theDeltaPath);
 
-
-#pragma mark - Accessors -
-
-#pragma mark Private
 private:
 
   static QString GenerateDeltaProgramPath();
 
-#pragma mark Public
 public:
 
   const QString& OldAppPath() const { return oldAppPath; }
@@ -49,13 +40,6 @@ public:
   QByteArray CommandOutput() const { return commandOutput; }
   bool Success() const { return success; }
 
-
-#pragma mark - Mutators -
-
-#pragma mark Private
-private:
-
-#pragma mark Public
 public:
 
   bool GenerateDelta();

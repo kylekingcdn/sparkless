@@ -10,10 +10,6 @@
 
 #include <QDebug>
 
-#pragma mark - Constructors -
-
-#pragma mark Private
-
 ItemDelta::ItemDelta(const qlonglong theLength, const qlonglong thePrevBuild, const qlonglong theNewBuild, const QString& theVersion, const QUrl& theUrl, const EnclosurePlatform thePlatform, const QByteArray& theSignature, const EnclosureSignatureType theSignatureType, QObject* theParent)
 : ItemEnclosure(theLength, theNewBuild, theVersion, theUrl, thePlatform, theSignature, theSignatureType, theParent) {
 
@@ -25,8 +21,6 @@ ItemDelta::ItemDelta(const QDomElement& theEnclosureElement, QObject* theParent)
 : ItemEnclosure(theEnclosureElement, theParent) {
 
 }
-
-#pragma mark Public
 
 ItemDelta* ItemDelta::FromElement(const QDomElement& theEnclosureElement, QObject* theParent) {
 
@@ -51,25 +45,12 @@ ItemDelta::~ItemDelta() {
 
 }
 
-
-#pragma mark - Accessors -
-
-#pragma mark Private
-
-#pragma mark Public
-
 void ItemDelta::Print() const {
 
   ItemEnclosure::Print();
 
   qInfo().noquote().nospace() << "Delta Version Intitial: " << initialVersionBuild;
 }
-
-
-
-#pragma mark - Mutators -
-
-#pragma mark Private
 
 bool ItemDelta::ParseXml() {
 
@@ -81,8 +62,6 @@ bool ItemDelta::ParseXml() {
   
   return true;
 }
-
-#pragma mark Public
 
 bool ItemDelta::Serialize(QDomElement& theDeltaElement) {
 

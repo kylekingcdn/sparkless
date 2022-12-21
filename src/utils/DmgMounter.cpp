@@ -13,10 +13,6 @@
 #include <QDebug>
 #include <QProcess>
 
-#pragma mark - Constructors -
-
-#pragma mark Public
-
 DmgMounter::DmgMounter() {
 
 }
@@ -27,18 +23,10 @@ DmgMounter::DmgMounter(const QString& theImagePath, const QString& theMountPoint
   SetMountPoint(theMountPoint);
 }
 
-
-#pragma mark - Accessors -
-
-#pragma mark Private
-
 QString DmgMounter::HdiutilPath() {
 
   return QString("/usr/bin/hdiutil");
 }
-
-
-#pragma mark - Mutators -
 
 void DmgMounter::SetImagePath(const QString& thePath) {
 
@@ -49,8 +37,6 @@ void DmgMounter::SetMountPoint(const QString& theMountPoint) {
 
   mountPoint = theMountPoint;
 }
-
-#pragma mark Public
 
 bool DmgMounter::Mount() {
 

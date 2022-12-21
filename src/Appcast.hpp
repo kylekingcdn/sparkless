@@ -38,15 +38,10 @@ private:
 
   QString urlPrefix;
 
-
-#pragma mark - Constructors -
-
-#pragma mark Private
 private:
 
   Appcast(const QDomDocument&, QObject* theParent = nullptr);
 
-#pragma mark Public
 public:
 
   static Appcast* FromDocument(const QDomDocument&, QObject* theParent = nullptr);
@@ -54,15 +49,10 @@ public:
 
   virtual ~Appcast() Q_DECL_OVERRIDE;
 
-
-#pragma mark - Accessors -
-
-#pragma mark Private
 private:
 
   QString TemporaryMountDirForBuild(const qlonglong);
 
-#pragma mark Public
 public:
 
   const QList<AppcastItem*>& Items() const { return items; }
@@ -90,17 +80,12 @@ public:
 
   void PrintItems() const;
 
-
-#pragma mark - Mutators -
-
-#pragma mark Private
 private:
 
   bool ParseXml();
 
   ItemEnclosure* AddEnclosureToItemWithSignature(AppcastItem* theItem, const QString& theFilePath, const EnclosurePlatform thePlatform, const QByteArray& theSignature, const EnclosureSignatureType theSignatureType);
 
-#pragma mark Public
 public:
 
   void SetS3Region(const QString&);
@@ -121,8 +106,6 @@ public:
   bool Save(const QString& theFilePath);
 
   bool AddItem(AppcastItem*);
-
-
 };
 
 #endif /* Appcast_hpp */

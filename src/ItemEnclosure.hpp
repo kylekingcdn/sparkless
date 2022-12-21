@@ -38,17 +38,12 @@ private:
   EnclosurePlatform platform = NullPlatform;
   QStringList installerArguments;
 
-
-#pragma mark - Constructors -
-
-#pragma mark Protected
 protected:
 
   ItemEnclosure(QObject* theParent = nullptr);
   ItemEnclosure(const qlonglong theLength, const qlonglong theBuild, const QString& theVersion, const QUrl& theUrl, const EnclosurePlatform thePlatform, const QByteArray& theSignature, const EnclosureSignatureType theSignatureType, QObject* theParent = nullptr);
   ItemEnclosure(const QDomElement&, QObject* theParent = nullptr);
 
-#pragma mark Public
 public:
 
   static ItemEnclosure* FromElement(const QDomElement&, QObject* theParent = nullptr);
@@ -57,18 +52,10 @@ public:
 
   virtual ~ItemEnclosure() Q_DECL_OVERRIDE;
 
-
-#pragma mark - Accessors -
-
-#pragma mark Private
-private:
-
-#pragma mark Protected
 protected:
 
   const QDomElement& EnclosureElement() const { return enclosureElement; }
 
-#pragma mark Public
 public:
 
   const QString& VersionDescription() const { return versionDescription; }
@@ -98,19 +85,13 @@ public:
 
   virtual void Print() const;
 
-
-#pragma mark - Mutators -
-
-#pragma mark Protected
 protected:
 
   virtual bool ParseXml();
 
-#pragma mark Public
 public:
 
   virtual bool Serialize(QDomElement& theEnclosureElement);
-  
 };
 
 #endif /* ItemEnclosure_hpp */

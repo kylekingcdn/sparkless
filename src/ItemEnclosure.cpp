@@ -15,10 +15,6 @@ QList<EnclosureSignatureType> ItemEnclosure::VALID_SIGNATURE_TYPES = {
   DsaSignature,
 };
 
-#pragma mark - Constructors -
-
-#pragma mark Protected
-
 ItemEnclosure::ItemEnclosure(QObject* theParent)
 : QObject(theParent) {
   
@@ -54,8 +50,6 @@ ItemEnclosure::ItemEnclosure(const QDomElement& theEnclosureElement, QObject* th
   enclosureElement = theEnclosureElement;
 }
 
-#pragma mark Public
-
 ItemEnclosure* ItemEnclosure::FromElement(const QDomElement& theEnclosureElement, QObject* theParent) {
 
   ItemEnclosure* enclsoure = new ItemEnclosure(theEnclosureElement, theParent);
@@ -78,13 +72,6 @@ ItemEnclosure* ItemEnclosure::NewEnclosure(const qlonglong theLength, const qlon
 ItemEnclosure::~ItemEnclosure() {
 
 }
-
-
-#pragma mark - Accessors -
-
-#pragma mark Private
-
-#pragma mark Public
 
 EnclosureSignatureType ItemEnclosure::SignatureTypeFromXmlKey(const QString& theString) {
 
@@ -180,12 +167,6 @@ void ItemEnclosure::Print() const {
   qInfo().noquote().nospace() << fileUrl.path().section('/', -1);
 }
 
-
-
-#pragma mark - Mutators -
-
-#pragma mark Private
-
 bool ItemEnclosure::ParseXml() {
 
   versionDescription = enclosureElement.attribute("sparkle:shortVersionString");
@@ -224,8 +205,6 @@ bool ItemEnclosure::ParseXml() {
 
   return true;
 }
-
-#pragma mark Public
 
 bool ItemEnclosure::Serialize(QDomElement& theEnclosureElement) {
 

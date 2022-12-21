@@ -21,18 +21,11 @@
 #include "utils/DeltaGenerator.hpp"
 #include "utils/DmgMounter.hpp"
 
-#pragma mark - Constructors -
-
-#pragma mark Private
-
 Appcast::Appcast(const QDomDocument& theXmlDoc, QObject* theParent)
 : QObject(theParent) {
 
   appcastDoc = theXmlDoc;
 }
-
-
-#pragma mark Public
 
 Appcast* Appcast::FromDocument(const QDomDocument& theXmlDoc, QObject* theParent) {
 
@@ -85,17 +78,10 @@ Appcast::~Appcast() {
   qDeleteAll(items);
 }
 
-
-#pragma mark - Accessors -
-
-#pragma mark Private
-
 QString Appcast::TemporaryMountDirForBuild(const qlonglong theBuildNumber) {
 
   return QString("/tmp/sparkless/%1").arg(theBuildNumber);
 }
-
-#pragma mark Public
 
 AppcastItem* Appcast::Item(const qlonglong theBuildVersion) const {
 
@@ -195,10 +181,6 @@ void Appcast::PrintItems() const {
   }
 }
 
-#pragma mark - Mutators -
-
-#pragma mark Private
-
 bool Appcast::ParseXml() {
 
   if (appcastDoc.isNull()) {
@@ -252,8 +234,6 @@ ItemEnclosure* Appcast::AddEnclosureToItemWithSignature(AppcastItem* theItem, co
   return enclosure;
 }
 
-#pragma mark Public
-
 void Appcast::SetS3Region(const QString& theS3Region) {
 
   s3Region = theS3Region;
@@ -294,7 +274,9 @@ ItemDelta* Appcast::CreateDeltaForBuild(const qlonglong theOldBuildNumber, const
   Q_ASSERT(theNewItem != nullptr);
   Q_ASSERT(!theNewReleasePath.isEmpty());
   Q_ASSERT(theOldBuildNumber >= 0);
-  Q_ASSERT(theNewItem->VersionBuild() >= 0);
+  if (theNewItem != nullptr) {
+    Q_ASSERT(theNewItem->VersionBuild() >= 0);
+  }
   Q_ASSERT(thePlatform != NullPlatform);
 
   // temp. enforce .dmg only
@@ -515,5 +497,3 @@ bool Appcast::AddItem(AppcastItem* theItem) {
 
   return true;
 }
-
-#pragma mark Public

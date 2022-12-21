@@ -40,16 +40,11 @@ private:
 
   QHash<qlonglong, QHash<EnclosurePlatform, ItemDelta*>> deltaHash;
 
-
-#pragma mark - Constructors -
-
-#pragma mark Private
 private:
 
   AppcastItem(QObject* theParent = nullptr);
   AppcastItem(const QDomElement&, QObject* theParent = nullptr);
 
-#pragma mark Public
 public:
 
   static AppcastItem* FromElement(const QDomElement&, QObject* theParent = nullptr);
@@ -57,16 +52,11 @@ public:
 
   virtual ~AppcastItem() Q_DECL_OVERRIDE;
 
-
-#pragma mark - Accessors -
-
-#pragma mark Private
 private:
 
   static QDateTime TimestampFromString(const QString&);
   static QString TimestampToString(const QDateTime&);
 
-#pragma mark Public
 public:
 
   const QString Title() const { return title; }
@@ -87,18 +77,12 @@ public:
   const QList<ItemDelta*>& Deltas() const { return deltas; }
   ItemDelta Delta(const EnclosurePlatform, const qlonglong) const;
 
-
   void Print() const;
 
-
-#pragma mark - Mutators -
-
-#pragma mark Private
 private:
 
   bool ParseXml();
 
-#pragma mark Public
 public:
 
   void SetTitle(const QString&);
@@ -107,10 +91,6 @@ public:
 
   ItemEnclosure* AddEnclosure(const qlonglong theLength, const QUrl& theUrl, const EnclosurePlatform thePlatform, const QByteArray& theSignature, const EnclosureSignatureType theSignatureType);
   ItemDelta* AddDelta(const qlonglong prevBuildVersion, const qlonglong theLength, const QUrl& theUrl, const EnclosurePlatform thePlatform, const QByteArray& theSignature, const EnclosureSignatureType theSignatureType);
-
-
-  //ItemDelta* AddDelta();
-
 };
 
 #endif /* AppcastItem_hpp */

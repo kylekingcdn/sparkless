@@ -13,9 +13,7 @@
 #include <QFileInfo>
 #include <QProcess>
 
-#pragma mark - Constructors -
-
-#pragma mark Public
+#include "Constants.hpp"
 
 EdDsaSignatureGenerator::EdDsaSignatureGenerator() {
 
@@ -29,20 +27,10 @@ EdDsaSignatureGenerator::EdDsaSignatureGenerator(const QString& theBinaryPath, c
   GenerateSignature();
 }
 
-
-#pragma mark - Accessors -
-
-#pragma mark Private
-
 QString EdDsaSignatureGenerator::GenerateSignatureProgramPath() {
 
   return QString("%1/%2").arg(HelperScriptsDir(), "sign_update_EdDSA");
 }
-
-
-#pragma mark - Mutators -
-
-#pragma mark Public
 
 void EdDsaSignatureGenerator::SetBinaryPath(const QString& thePath) {
 

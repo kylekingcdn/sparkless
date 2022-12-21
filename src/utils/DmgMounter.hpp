@@ -23,25 +23,15 @@ private:
   bool success = false;
   QByteArray commandOutput;
 
-
-#pragma mark - Constructors -
-
-#pragma mark Public
 public:
 
   DmgMounter();
   DmgMounter(const QString& theImagePath, const QString& theMountPoint);
 
-
-#pragma mark - Accessors -
-
-#pragma mark Private
 private:
 
   static QString HdiutilPath();
 
-
-#pragma mark Public
 public:
 
   const QString& ImagePath() const { return imagePath; }
@@ -52,10 +42,6 @@ public:
   bool Success() const { return success; }
   QByteArray CommandOutput() const { return commandOutput; }
 
-
-#pragma mark - Mutators -
-
-#pragma mark Public
 public:
 
   void SetImagePath(const QString&);

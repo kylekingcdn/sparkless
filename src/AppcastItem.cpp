@@ -13,10 +13,6 @@
 #include "ItemEnclosure.hpp"
 #include "ItemDelta.hpp"
 
-#pragma mark - Constructors -
-
-#pragma mark Private
-
 AppcastItem::AppcastItem(QObject* theParent)
 : QObject(theParent) {
 
@@ -27,8 +23,6 @@ AppcastItem::AppcastItem(const QDomElement& theItemElement, QObject* theParent)
 
   itemElement = theItemElement;
 }
-
-#pragma mark Public
 
 AppcastItem* AppcastItem::FromElement(const QDomElement& theItemElement, QObject* theParent) {
 
@@ -56,11 +50,6 @@ AppcastItem::~AppcastItem() {
 
 }
 
-
-#pragma mark - Accessors -
-
-#pragma mark Private
-
 QDateTime AppcastItem::TimestampFromString(const QString& theString) {
 
   QDateTime timestamp = QDateTime::fromString(theString, "ddd, dd MMM yyyy HH:mm:ss +0000");
@@ -73,8 +62,6 @@ QString AppcastItem::TimestampToString(const QDateTime& theTimestamp) {
 
   return theTimestamp.toString("ddd, dd MMM yyyy HH:mm:ss +0000");
 }
-
-#pragma mark Public
 
 ItemEnclosure* AppcastItem::Enclosure(const EnclosurePlatform thePlatform) const {
 
@@ -109,12 +96,6 @@ void AppcastItem::Print() const {
     }
   }
 }
-
-
-
-#pragma mark - Mutators -
-
-#pragma mark Private
 
 bool AppcastItem::ParseXml() {
 
@@ -163,8 +144,6 @@ bool AppcastItem::ParseXml() {
 
   return true;
 }
-
-#pragma mark Public
 
 void AppcastItem::SetTitle(const QString& theTitle) {
 

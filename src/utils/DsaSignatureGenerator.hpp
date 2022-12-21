@@ -11,8 +11,6 @@
 
 #include <QObject>
 
-#include "Constants.hpp"
-
 class DsaSignatureGenerator {
 
 private:
@@ -25,24 +23,15 @@ private:
   bool success = false;
   QByteArray commandOutput;
 
-
-#pragma mark - Constructors -
-
-#pragma mark Public
 public:
 
   explicit DsaSignatureGenerator();
   explicit DsaSignatureGenerator(const QString& theBinaryPath, const QString& DsaKeyPath);
 
-
-#pragma mark - Accessors -
-
-#pragma mark Private
 private:
 
 static QString GenerateSignatureProgramPath();
 
-#pragma mark Public
 public:
 
   const QString& BinaryPath() const { return binaryPath; }
@@ -53,10 +42,6 @@ public:
   const QByteArray& CommandOutput() const { return commandOutput; }
   const QByteArray& Signature() const { return signature; }
 
-
-#pragma mark - Mutators -
-
-#pragma mark Public
 public:
 
   bool GenerateSignature();

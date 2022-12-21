@@ -274,7 +274,7 @@ int main(int argc, char *argv[]) {
     }
 
     const int deltasCount = parser.value(deltasOption).toInt();
-    if (QString::number(deltasCount) != parser.value(deltasOption)) {
+    if (parser.isSet(deltasOption) && QString::number(deltasCount) != parser.value(deltasOption)) {
       qCritical().nospace().noquote() << "invalid value for option '--"<<deltasOption.names().first()<<"'. Please specify a number > 0'";
       return 1;
     }

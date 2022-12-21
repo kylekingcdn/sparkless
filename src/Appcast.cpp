@@ -269,7 +269,7 @@ AppcastItem* Appcast::CreateItem(const QString& theVersionDescription, const qlo
   return newItem;
 }
 
-ItemDelta* Appcast::CreateDeltaForBuild(const qlonglong theOldBuildNumber, const QString theNewReleasePath, AppcastItem* theNewItem, const EnclosurePlatform thePlatform, const QByteArray& theEdDsaKey) {
+ItemDelta* Appcast::CreateDeltaForBuild(const qlonglong theOldBuildNumber, const QString theNewReleasePath, AppcastItem* theNewItem, const EnclosurePlatform thePlatform, const QByteArray& theEdDsaKey, const QString& theGeneratorPath) {
 
   Q_ASSERT(theNewItem != nullptr);
   Q_ASSERT(!theNewReleasePath.isEmpty());
@@ -344,7 +344,7 @@ ItemDelta* Appcast::CreateDeltaForBuild(const qlonglong theOldBuildNumber, const
         newReleaseMounter.Unmount();
         oldReleaseMounter.Unmount();
 
-        newDelta = AddDeltaToIem(theNewItem, theOldBuildNumber, deltaPath, theEdDsaKey);
+        newDelta = AddDeltaToItem(theNewItem, theOldBuildNumber, deltaPath, theEdDsaKey, theGeneratorPath);
       }
     }
   }
@@ -352,9 +352,9 @@ ItemDelta* Appcast::CreateDeltaForBuild(const qlonglong theOldBuildNumber, const
   return newDelta;
 }
 
-ItemEnclosure* Appcast::AddEnclosureToIem(AppcastItem* theItem, const QString& theFilePath, const EnclosurePlatform thePlatform, const QString& theDsaKeyPath) {
+ItemEnclosure* Appcast::AddEnclosureToItem(AppcastItem* theItem, const QString& theFilePath, const EnclosurePlatform thePlatform, const QString& theDsaKeyPath, const QString& theGeneratorPath) {
 
-  DsaSignatureGenerator signatureGenerator(theFilePath, theDsaKeyPath);
+  DsaSignatureGenerator signatureGenerator(theFilePath, theDsaKeyPath, theGeneratorPath);
   if (!signatureGenerator.Success()) {
     qWarning().noquote().nospace() << "error adding enclosure to item - failed to generate DSA signature";
     return nullptr;
@@ -363,9 +363,9 @@ ItemEnclosure* Appcast::AddEnclosureToIem(AppcastItem* theItem, const QString& t
   return AddEnclosureToItemWithSignature(theItem, theFilePath, thePlatform, signatureGenerator.Signature(), DsaSignature);
 }
 
-ItemEnclosure* Appcast::AddEnclosureToIem(AppcastItem* theItem, const QString& theFilePath, const EnclosurePlatform thePlatform, const QByteArray& theEdDsaKey) {
+ItemEnclosure* Appcast::AddEnclosureToItem(AppcastItem* theItem, const QString& theFilePath, const EnclosurePlatform thePlatform, const QByteArray& theEdDsaKey, const QString& theGeneratorPath) {
 
-  EdDsaSignatureGenerator signatureGenerator(theFilePath, theEdDsaKey);
+  EdDsaSignatureGenerator signatureGenerator(theFilePath, theEdDsaKey, theGeneratorPath);
   if (!signatureGenerator.Success()) {
     qWarning().noquote().nospace() << "error adding enclosure to item - failed to generate EdDSA signature";
     return nullptr;
@@ -374,9 +374,9 @@ ItemEnclosure* Appcast::AddEnclosureToIem(AppcastItem* theItem, const QString& t
   return AddEnclosureToItemWithSignature(theItem, theFilePath, thePlatform, signatureGenerator.Signature(), Ed25519Signature);
 }
 
-ItemDelta* Appcast::AddDeltaToIem(AppcastItem* theItem, const qlonglong thePrevVersion, const QString& theFilePath, const QByteArray& theEdDsaKey) {
+ItemDelta* Appcast::AddDeltaToItem(AppcastItem* theItem, const qlonglong thePrevVersion, const QString& theFilePath, const QByteArray& theEdDsaKey, const QString& theGeneratorPath) {
 
-  EdDsaSignatureGenerator signatureGenerator(theFilePath, theEdDsaKey);
+  EdDsaSignatureGenerator signatureGenerator(theFilePath, theEdDsaKey, theGeneratorPath);
   if (!signatureGenerator.Success()) {
     qWarning().noquote().nospace() << "error adding enclosure to item - failed to generate EdDSA signature";
     return nullptr;

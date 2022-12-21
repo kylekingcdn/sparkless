@@ -17,6 +17,7 @@ private:
 
   QString binaryPath;
   QByteArray edDsaKey;
+  QString edDsaGeneratorPath;
 
   QByteArray signature;
 
@@ -26,16 +27,13 @@ private:
 public:
 
   explicit EdDsaSignatureGenerator();
-  explicit EdDsaSignatureGenerator(const QString& theBinaryPath, const QByteArray& EdDsaKey);
-
-private:
-
-static QString GenerateSignatureProgramPath();
+  explicit EdDsaSignatureGenerator(const QString& theBinaryPath, const QByteArray& EdDsaKey, const QString& generatorPath);
 
 public:
 
   const QString& BinaryPath() const { return binaryPath; }
   const QByteArray& EdDsaKey() const { return edDsaKey; }
+  const QString& EdDsaGeneratorPath() const { return edDsaGeneratorPath; }
 
   const QByteArray& Signature() const { return signature; }
 
@@ -46,6 +44,7 @@ public:
 
   void SetBinaryPath(const QString&);
   void SetEdDsaKey(const QByteArray&);
+  void SetEdDsaGeneratorPath(const QString&);
 
   bool GenerateSignature();
 

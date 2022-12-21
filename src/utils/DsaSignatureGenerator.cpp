@@ -10,26 +10,21 @@
 
 #include <QCoreApplication>
 #include <QDebug>
+#include <QDir>
 #include <QProcess>
 #include <QFileInfo>
-
-#include "Constants.hpp"
 
 DsaSignatureGenerator::DsaSignatureGenerator() {
 
 }
 
-DsaSignatureGenerator::DsaSignatureGenerator(const QString& theBinaryPath, const QString& theDsaKeyPath) {
+DsaSignatureGenerator::DsaSignatureGenerator(const QString& theBinaryPath, const QString& theDsaKeyPath, const QString& theDsaGeneratorPath) {
 
   SetBinaryPath(theBinaryPath);
   SetDsaKeyPath(theDsaKeyPath);
+  SetDsaGeneratorPath(theDsaGeneratorPath);
 
   GenerateSignature();
-}
-
-QString DsaSignatureGenerator::GenerateSignatureProgramPath() {
-
-  return QString("%1/%2").arg(HelperScriptsDir(), "sign_update.bat");
 }
 
 void DsaSignatureGenerator::SetBinaryPath(const QString& thePath) {
@@ -42,15 +37,18 @@ void DsaSignatureGenerator::SetDsaKeyPath(const QString& thePath) {
   dsaKeyPath = thePath;
 }
 
+void DsaSignatureGenerator::SetDsaGeneratorPath(const QString& thePath)
+{
+  dsaGeneratorPath = thePath;
+}
+
 bool DsaSignatureGenerator::GenerateSignature() {
 
   // reset signature value
   signature = QByteArray();
 
-  const QString generatePath = GenerateSignatureProgramPath();
-
-  if (!QFileInfo::exists(generatePath)) {
-    qFatal("Could not find dsa signature generator program at expected path: %s", generatePath.toLatin1().constData());
+  if (!QFileInfo::exists(dsaGeneratorPath)) {
+    qFatal("Could not find dsa signature generator program at expected path: %s", dsaGeneratorPath.toUtf8().constData());
     return false;
   }
   if (!QFileInfo::exists(binaryPath)) {
@@ -68,17 +66,17 @@ bool DsaSignatureGenerator::GenerateSignature() {
   };
 
   QProcess generateProcess;
-  generateProcess.setProgram(generatePath);
+  generateProcess.setProgram(QDir::fromNativeSeparators(dsaGeneratorPath));
   generateProcess.setArguments(generateArgs);
 //  qDebug().noquote().nospace() << "DsaSignatureGenerator::GenerateSignature() executing '" << generateProcess.program() << " " << generateProcess.arguments().join(' ') << "'";
   generateProcess.start();
 
   if (!generateProcess.waitForStarted(-1)) {
-    qWarning() << "waitForStarted() failed for: " << generatePath;
+    qWarning() << "waitForStarted() failed for: " << dsaGeneratorPath;
     success = false;
   }
   else if (!generateProcess.waitForFinished(-1)) {
-    qWarning() << "waitForFinished() failed for: " << generatePath;
+    qWarning() << "waitForFinished() failed for: " << dsaGeneratorPath;
     success = false;
   }
   else {

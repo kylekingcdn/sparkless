@@ -96,12 +96,12 @@ public:
   void SetUrlPrefix(const QString&);
 
   AppcastItem* CreateItem(const QString& theVersionDescription, const qlonglong theVersionBuild);
-  ItemDelta* CreateDeltaForBuild(const qlonglong theOldBuildNumber, const QString theNewReleasePath, AppcastItem* theNewItem, const EnclosurePlatform thePlatform, const QByteArray& theEdDsaKey);
+  ItemDelta* CreateDeltaForBuild(const qlonglong theOldBuildNumber, const QString theNewReleasePath, AppcastItem* theNewItem, const EnclosurePlatform thePlatform, const QByteArray& theEdDsaKey, const QString& theGeneratorPath);
 
-  ItemEnclosure* AddEnclosureToIem(AppcastItem* theItem, const QString& theFilePath, const EnclosurePlatform thePlatform, const QString& theDsaKeyPath);
-  ItemEnclosure* AddEnclosureToIem(AppcastItem* theItem, const QString& theFilePath, const EnclosurePlatform thePlatform, const QByteArray& theEdDsaKey);
+  ItemEnclosure* AddEnclosureToItem(AppcastItem* theItem, const QString& theFilePath, const EnclosurePlatform thePlatform, const QString& theDsaKeyPath, const QString& theGeneratorPath);
+  ItemEnclosure* AddEnclosureToItem(AppcastItem* theItem, const QString& theFilePath, const EnclosurePlatform thePlatform, const QByteArray& theEdDsaKey, const QString& theGeneratorPath);
 
-  ItemDelta* AddDeltaToIem(AppcastItem* theItem, const qlonglong thePrevVersion, const QString& theFilePath, const QByteArray& theEdDsaKey);
+  ItemDelta* AddDeltaToItem(AppcastItem* theItem, const qlonglong thePrevVersion, const QString& theFilePath, const QByteArray& theEdDsaKey, const QString& theGeneratorPath);
 
   bool Save(const QString& theFilePath);
 

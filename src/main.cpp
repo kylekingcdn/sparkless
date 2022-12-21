@@ -51,7 +51,9 @@ int main(int argc, char *argv[]) {
   QCommandLineOption deltasOption("deltas", "The number of delta updates to generate, without specifying this deltas will NOT be generated", "num_deltas");
 
   QCommandLineOption edDsaKeyOption("eddsa-key", "The Ed25519 key used for signing (the key is passed in-line, not by filepath) [required for macOS delta updates]", "key");
+  QCommandLineOption edDsaGeneratorPathOption("eddsa-generator-path", "The local file path to the executable used to generate the Ed25519 signature", "generator_path");
   QCommandLineOption dsaKeyFilePathOption("dsa-key-path", "The local file path to the dsa key used for signing [required for windows bundles]", "key_path");
+  QCommandLineOption dsaGeneratorPathOption("dsa-generator-path", "The local file path to the executable used to generate the DSA signature [required for windows bundles]", "generator_path");
 
   QCommandLineOption s3RegionOption("s3-region", "The s3 region (used for url generation)", "region");
   QCommandLineOption s3BucketOption("s3-bucket", "The s3 bucket (used for url generation)", "bucket_name");
@@ -72,7 +74,7 @@ int main(int argc, char *argv[]) {
       versionStringOption, versionBuildOption,
       macBundleOption, windowsBundleOption,
       deltasOption,
-      edDsaKeyOption, dsaKeyFilePathOption,
+      edDsaKeyOption, edDsaGeneratorPathOption, dsaKeyFilePathOption, dsaGeneratorPathOption,
       s3RegionOption, s3BucketOption, s3BucketDirOption, s3MirrorPathOption,
       urlPrefixOption,
     });
@@ -86,7 +88,7 @@ int main(int argc, char *argv[]) {
   else if (qApp->arguments().contains("sign")) {
     parser.addOptions({
       macBundleOption, windowsBundleOption,
-      edDsaKeyOption, dsaKeyFilePathOption,
+      edDsaKeyOption, edDsaGeneratorPathOption, dsaKeyFilePathOption, dsaGeneratorPathOption,
     });
   }
   // delta options
@@ -145,15 +147,27 @@ int main(int argc, char *argv[]) {
       return 1;
     }
 
+    if (parser.isSet(dsaKeyFilePathOption) && !parser.isSet(dsaGeneratorPathOption)) {
+      qCritical().noquote().nospace() << "`sign` option '--dsa-key-path' requires a path to a DSA signature generator. Please specify one with '--dsa-generator-path'";
+      return -1;
+    }
+
+    if (parser.isSet(edDsaKeyOption) && !parser.isSet(edDsaGeneratorPathOption)) {
+      qCritical().noquote().nospace() << "`sign` option '--eddsa-key' requires a path to an Ed25519 signature generator. Please specify one with '--eddsa-generator-path'";
+      return -1;
+    }
+
     const QString macBundlePath = parser.value(macBundleOption);
     const QString windowsBundlePath = parser.value(windowsBundleOption);
     const QByteArray edDsaKey = parser.isSet(edDsaKeyOption) ? parser.value(edDsaKeyOption).toUtf8() : QByteArray();
-    const QString dsaKeyPath = parser.value(dsaKeyFilePathOption);
+    const QString edDsaGeneratorPath = QDir::fromNativeSeparators(parser.value(edDsaGeneratorPathOption));
+    const QString dsaKeyPath = QDir::fromNativeSeparators(parser.value(dsaKeyFilePathOption));
+    const QString dsaGeneratorPath = QDir::fromNativeSeparators(parser.value(dsaGeneratorPathOption));
 
     if (parser.isSet(macBundleOption)) {
 
       if (parser.isSet(edDsaKeyOption)) {
-        EdDsaSignatureGenerator sigGenerator(macBundlePath, edDsaKey);
+        EdDsaSignatureGenerator sigGenerator(macBundlePath, edDsaKey, edDsaGeneratorPath);
         if (!sigGenerator.Success()) {
           return 1;
         }
@@ -161,7 +175,7 @@ int main(int argc, char *argv[]) {
       }
       else if (parser.isSet(dsaKeyFilePathOption)) {
         qDebug() << "dsa key path: " << dsaKeyPath;
-        DsaSignatureGenerator sigGenerator(macBundlePath, dsaKeyPath);
+        DsaSignatureGenerator sigGenerator(macBundlePath, dsaKeyPath, dsaGeneratorPath);
         if (!sigGenerator.Success()) {
           return 1;
         }
@@ -170,7 +184,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (parser.isSet(windowsBundleOption)) {
-      DsaSignatureGenerator sigGenerator(windowsBundlePath, dsaKeyPath);
+      DsaSignatureGenerator sigGenerator(windowsBundlePath, dsaKeyPath, dsaGeneratorPath);
       if (!sigGenerator.Success()) {
         return 1;
       }
@@ -231,6 +245,16 @@ int main(int argc, char *argv[]) {
       return 1;
     }
 
+    if (parser.isSet(dsaKeyFilePathOption) && !parser.isSet(dsaGeneratorPathOption)) {
+      qCritical().noquote().nospace() << "`add` option '--dsa-key-path' requires a path to a DSA signature generator. Please specify one with '--dsa-generator-path'";
+      return -1;
+    }
+
+    if (parser.isSet(edDsaKeyOption) && !parser.isSet(edDsaGeneratorPathOption)) {
+      qCritical().noquote().nospace() << "`add` option '--eddsa-key' requires a path to an Ed25519 signature generator. Please specify one with '--eddsa-generator-path'";
+      return -1;
+    }
+
     if (!parser.isSet(versionBuildOption)) {
       qCritical().noquote().nospace() << "`add` requires '--build'";
       return 1;
@@ -268,11 +292,13 @@ int main(int argc, char *argv[]) {
     const QString versionString = parser.value(versionStringOption);
     const qlonglong versionBuild = parser.value(versionBuildOption).toLongLong();
 
-    const QString macBundlePath = parser.isSet(macBundleOption) ? QDir::fromNativeSeparators(parser.value(macBundleOption)) : QString();
-    const QString windowsBundlePath = parser.isSet(windowsBundleOption) ? QDir::fromNativeSeparators(parser.value(windowsBundleOption)) : QString();
+    const QString macBundlePath = QDir::fromNativeSeparators(parser.value(macBundleOption));
+    const QString windowsBundlePath = QDir::fromNativeSeparators(parser.value(windowsBundleOption));
 
     const QByteArray edDsaKey = parser.isSet(edDsaKeyOption) ? parser.value(edDsaKeyOption).toUtf8() : QByteArray();
-    const QString dsaKeyPath = parser.isSet(dsaKeyFilePathOption) ? QDir::fromNativeSeparators(parser.value(dsaKeyFilePathOption)) : QString();
+    const QString edDsaGeneratorPath = QDir::fromNativeSeparators(parser.value(edDsaGeneratorPathOption));
+    const QString dsaKeyPath = QDir::fromNativeSeparators(parser.value(dsaKeyFilePathOption));
+    const QString dsaGeneratorPath = QDir::fromNativeSeparators(parser.value(dsaGeneratorPathOption));
 
     const QString appcastPath = QDir::fromNativeSeparators(parser.value(appcastOption));
     Appcast* appcast = Appcast::FromPath(appcastPath);
@@ -299,7 +325,7 @@ int main(int argc, char *argv[]) {
     if (parser.isSet(macBundleOption)) {
       if (parser.isSet(edDsaKeyOption)) {
 
-        ItemEnclosure* newMacEnclosure = appcast->AddEnclosureToIem(newItem, macBundlePath, MacPlatform, edDsaKey);
+        ItemEnclosure* newMacEnclosure = appcast->AddEnclosureToItem(newItem, macBundlePath, MacPlatform, edDsaKey, edDsaGeneratorPath);
         if (newMacEnclosure == nullptr) { qWarning().noquote().nospace() << "failed to add mac enclosure"; return 1; }
 
         if (deltasCount >= 1) {
@@ -311,7 +337,7 @@ int main(int argc, char *argv[]) {
 
           while (deltasCreated < deltasCount && currBuildNumber > 0) {
 
-            ItemDelta* newDelta = appcast->CreateDeltaForBuild(currBuildNumber, macBundlePath, newItem, MacPlatform, edDsaKey);
+            ItemDelta* newDelta = appcast->CreateDeltaForBuild(currBuildNumber, macBundlePath, newItem, MacPlatform, edDsaKey, edDsaGeneratorPath);
             if (newDelta != nullptr) {
               deltasCreated++;
             }
@@ -320,13 +346,13 @@ int main(int argc, char *argv[]) {
         }
       }
       else if (parser.isSet(dsaKeyFilePathOption)) {
-        ItemEnclosure* newMacEnclosure = appcast->AddEnclosureToIem(newItem, macBundlePath, MacPlatform, dsaKeyPath);
+        ItemEnclosure* newMacEnclosure = appcast->AddEnclosureToItem(newItem, macBundlePath, MacPlatform, dsaKeyPath, dsaGeneratorPath);
         if (newMacEnclosure == nullptr) { qWarning().noquote().nospace() << "failed to add mac enclosure"; return 1; }
       }
     }
     if (parser.isSet(windowsBundleOption)) {
       if (parser.isSet(dsaKeyFilePathOption)) {
-        ItemEnclosure* newWindowsEnclosure = appcast->AddEnclosureToIem(newItem, windowsBundlePath, WindowsPlatform, dsaKeyPath);
+        ItemEnclosure* newWindowsEnclosure = appcast->AddEnclosureToItem(newItem, windowsBundlePath, WindowsPlatform, dsaKeyPath, dsaGeneratorPath);
         if (newWindowsEnclosure == nullptr) { qWarning().noquote().nospace() << "failed to add windows enclosure"; return 1; }
       }
     }

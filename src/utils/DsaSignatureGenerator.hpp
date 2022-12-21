@@ -17,6 +17,7 @@ private:
 
   QString binaryPath;
   QString dsaKeyPath;
+  QString dsaGeneratorPath;
 
   QByteArray signature;
 
@@ -26,16 +27,13 @@ private:
 public:
 
   explicit DsaSignatureGenerator();
-  explicit DsaSignatureGenerator(const QString& theBinaryPath, const QString& DsaKeyPath);
-
-private:
-
-static QString GenerateSignatureProgramPath();
+  explicit DsaSignatureGenerator(const QString& theBinaryPath, const QString& DsaKeyPath, const QString& generatorPath);
 
 public:
 
   const QString& BinaryPath() const { return binaryPath; }
   const QString& DsaKeyPath() const { return dsaKeyPath; }
+  const QString& DsaGeneratorPath() const { return dsaGeneratorPath; }
 
   bool Success() const { return success; }
 
@@ -48,6 +46,7 @@ public:
 
   void SetBinaryPath(const QString&);
   void SetDsaKeyPath(const QString&);
+  void SetDsaGeneratorPath(const QString&);
 
 };
 

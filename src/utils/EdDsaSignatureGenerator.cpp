@@ -13,23 +13,17 @@
 #include <QFileInfo>
 #include <QProcess>
 
-#include "Constants.hpp"
-
 EdDsaSignatureGenerator::EdDsaSignatureGenerator() {
 
 }
 
-EdDsaSignatureGenerator::EdDsaSignatureGenerator(const QString& theBinaryPath, const QByteArray& theEdDsaKey) {
+EdDsaSignatureGenerator::EdDsaSignatureGenerator(const QString& theBinaryPath, const QByteArray& theEdDsaKey, const QString& generatorPath) {
 
   SetBinaryPath(theBinaryPath);
   SetEdDsaKey(theEdDsaKey);
+  SetEdDsaGeneratorPath(generatorPath);
 
   GenerateSignature();
-}
-
-QString EdDsaSignatureGenerator::GenerateSignatureProgramPath() {
-
-  return QString("%1/%2").arg(HelperScriptsDir(), "sign_update_EdDSA");
 }
 
 void EdDsaSignatureGenerator::SetBinaryPath(const QString& thePath) {
@@ -42,15 +36,18 @@ void EdDsaSignatureGenerator::SetEdDsaKey(const QByteArray& theKey) {
   edDsaKey = theKey;
 }
 
+void EdDsaSignatureGenerator::SetEdDsaGeneratorPath(const QString& generatorPath) {
+
+  edDsaGeneratorPath = generatorPath;
+}
+
 bool EdDsaSignatureGenerator::GenerateSignature() {
 
   // reset signature value
   signature = QByteArray();
 
-  const QString generatePath = GenerateSignatureProgramPath();
-
-  if (!QFileInfo::exists(generatePath)) {
-    qFatal("Could not find Ed25519 signature generator program at expected path: %s", generatePath.toLatin1().constData());
+  if (!QFileInfo::exists(edDsaGeneratorPath)) {
+    qFatal("Could not find Ed25519 signature generator program at expected path: %s", edDsaGeneratorPath.toUtf8().constData());
     return false;
   }
   if (!QFileInfo::exists(binaryPath)) {
@@ -68,17 +65,17 @@ bool EdDsaSignatureGenerator::GenerateSignature() {
   };
 
   QProcess generateProcess;
-  generateProcess.setProgram(generatePath);
+  generateProcess.setProgram(edDsaGeneratorPath);
   generateProcess.setArguments(generateArgs);
 //  qDebug().noquote().nospace() << "EdDsaSignatureGenerator::GenerateSignature() executing '" << generateProcess.program() << " " << generateProcess.arguments().join(' ') << "'";
   generateProcess.start();
 
   if (!generateProcess.waitForStarted(-1)) {
-    qWarning() << "waitForStarted() failed for: " << generatePath;
+    qWarning() << "waitForStarted() failed for: " << edDsaGeneratorPath;
     success = false;
   }
   else if (!generateProcess.waitForFinished(-1)) {
-    qWarning() << "waitForFinished() failed for: " << generatePath;
+    qWarning() << "waitForFinished() failed for: " << edDsaGeneratorPath;
     success = false;
   }
   else {

@@ -7,7 +7,7 @@
 //
 
 #include <QCoreApplication>
-#include <unistd.h>
+//#include <unistd.h>
 
 #include "Appcast.hpp"
 #include "AppcastItem.hpp"

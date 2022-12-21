@@ -83,7 +83,7 @@ bool AppcastItem::HasEnclosure(const EnclosurePlatform thePlatform) const {
 void AppcastItem::Print() const {
 
   qInfo();
-  qInfo().noquote().nospace() << QString("%1 %2 (%3)").arg(title).arg(versionDescription).arg(versionBuild);
+  qInfo().noquote().nospace() << QString("%1 %2 (%3)").arg(title, versionDescription).arg(versionBuild);
   qInfo().noquote().nospace() << "  Published: " << publishedTimestamp.toString();
   qInfo().noquote().nospace() << "  Enclosures";
   foreach (ItemEnclosure* currEnclosure, enclosures) {

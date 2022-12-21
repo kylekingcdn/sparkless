@@ -331,7 +331,7 @@ ItemDelta* Appcast::CreateDeltaForBuild(const qlonglong theOldBuildNumber, const
         const QString newReleaseBundlePath = QString("%1/%2.app").arg(newReleaseMountPoint, title);
         const QString deltaDir = QString("%1/deltas/%2").arg(QFileInfo(theNewReleasePath).dir().absolutePath()).arg(newBuildNumber);
         const QString deltaFilename = QString("%1.%2.%3.delta").arg(title).arg(theOldBuildNumber).arg(newBuildNumber);
-        const QString deltaPath = QString("%1/%2").arg(deltaDir).arg(deltaFilename);
+        const QString deltaPath = QString("%1/%2").arg(deltaDir, deltaFilename);
 //        qDebug() << "path for delta: " << deltaPath;
 
         QDir().mkpath(deltaDir);

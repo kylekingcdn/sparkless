@@ -36,7 +36,7 @@ DsaSignatureGenerator::DsaSignatureGenerator(const QString& theBinaryPath, const
 
 QString DsaSignatureGenerator::GenerateSignatureProgramPath() {
 
-  return QString("%1/%2").arg(HelperScriptsDir(), "sign_update_DSA");
+  return QString("%1/%2").arg(HelperScriptsDir(), "sign_update.bat");
 }
 
 

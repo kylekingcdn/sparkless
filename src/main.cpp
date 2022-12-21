@@ -7,6 +7,7 @@
 //
 
 #include <QCoreApplication>
+#include <QDir>
 //#include <unistd.h>
 
 #include "Appcast.hpp"
@@ -281,13 +282,13 @@ int main(int argc, char *argv[]) {
     const QString versionString = parser.value(versionStringOption);
     const qlonglong versionBuild = parser.value(versionBuildOption).toLongLong();
 
-    const QString macBundlePath = hasMacBundle ? parser.value(macBundleOption) : QString();
-    const QString windowsBundlePath = hasWindowsBundle ? parser.value(windowsBundleOption) : QString();
+    const QString macBundlePath = hasMacBundle ? QDir::fromNativeSeparators(parser.value(macBundleOption)) : QString();
+    const QString windowsBundlePath = hasWindowsBundle ? QDir::fromNativeSeparators(parser.value(windowsBundleOption)) : QString();
 
     const QByteArray edDsaKey = hasEdDsaKey ? parser.value(edDsaKeyOption).toUtf8() : QByteArray();
-    const QString dsaKeyPath = hasDsaKeyPath ? parser.value(dsaKeyFilePathOption) : QString();
+    const QString dsaKeyPath = hasDsaKeyPath ? QDir::fromNativeSeparators(parser.value(dsaKeyFilePathOption)) : QString();
 
-    const QString appcastPath = parser.value(appcastOption);
+    const QString appcastPath = QDir::fromNativeSeparators(parser.value(appcastOption));
     Appcast* appcast = Appcast::FromPath(appcastPath);
     if (appcast == nullptr) {
       return 1;

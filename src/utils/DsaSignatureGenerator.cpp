@@ -98,7 +98,7 @@ bool DsaSignatureGenerator::GenerateSignature() {
 
     if (generateProcess.exitStatus() == QProcess::NormalExit) {
 
-      signature = commandOutput.simplified();
+      signature = commandOutput.simplified().replace(' ', QByteArray(""));
 
       if (signature.isEmpty()) {
         qWarning() << "failed to parse DSA signature generator output: " << commandOutput;

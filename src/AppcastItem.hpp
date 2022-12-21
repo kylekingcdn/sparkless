@@ -29,7 +29,7 @@ private:
   QString title;
   QString description;
 
-  QUrl releaseNotesUrl;
+  QString releaseNotesUrl;
   QDateTime publishedTimestamp;
 
   QString versionDescription;
@@ -62,7 +62,7 @@ public:
   const QString Title() const { return title; }
   const QString Description() const { return description; }
 
-  const QUrl& ReleaseNotesUrl() const { return releaseNotesUrl; }
+  const QString& ReleaseNotesUrl() const { return releaseNotesUrl; }
 
   const QDateTime PublishedTimestamp() const { return publishedTimestamp; }
   const QString PublishedTimestampString() const { return TimestampToString(publishedTimestamp); }
@@ -87,7 +87,7 @@ public:
 
   void SetTitle(const QString&);
   void SetDescription(const QString&);
-  void SetReleaseNotesUrl(const QUrl&);
+  void SetReleaseNotesUrl(const QString&);
 
   ItemEnclosure* AddEnclosure(const qlonglong theLength, const QUrl& theUrl, const EnclosurePlatform thePlatform, const QByteArray& theSignature, const EnclosureSignatureType theSignatureType);
   ItemDelta* AddDelta(const qlonglong prevBuildVersion, const qlonglong theLength, const QUrl& theUrl, const EnclosurePlatform thePlatform, const QByteArray& theSignature, const EnclosureSignatureType theSignatureType);

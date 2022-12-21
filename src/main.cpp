@@ -44,6 +44,7 @@ int main(int argc, char *argv[]) {
 
   QCommandLineOption versionStringOption("version", "The descriptive (string) version for the new bundle", "version");
   QCommandLineOption versionBuildOption("build", "The build number/version for the new bundle", "build_number");
+  QCommandLineOption releaseNotesOption("release-notes-url", "The URL of this version's release notes", "url");
 
   QCommandLineOption macBundleOption("mac-bundle", "The local file path to the mac app/dmg/zip bundle", "bundle_path");
   QCommandLineOption windowsBundleOption("windows-bundle", "The local file path to the windows msi/exe/zip bundle", "bundle_path");
@@ -71,7 +72,7 @@ int main(int argc, char *argv[]) {
   if (qApp->arguments().contains("add")) {
     parser.addOptions({
       appcastOption,
-      versionStringOption, versionBuildOption,
+      versionStringOption, versionBuildOption, releaseNotesOption,
       macBundleOption, windowsBundleOption,
       deltasOption,
       edDsaKeyOption, edDsaGeneratorPathOption, dsaKeyFilePathOption, dsaGeneratorPathOption,
@@ -291,6 +292,7 @@ int main(int argc, char *argv[]) {
     }
     const QString versionString = parser.value(versionStringOption);
     const qlonglong versionBuild = parser.value(versionBuildOption).toLongLong();
+    const QString releaseNotesUrl = parser.value(releaseNotesOption);
 
     const QString macBundlePath = QDir::fromNativeSeparators(parser.value(macBundleOption));
     const QString windowsBundlePath = QDir::fromNativeSeparators(parser.value(windowsBundleOption));
@@ -321,6 +323,9 @@ int main(int argc, char *argv[]) {
     }
 
     AppcastItem* newItem = appcast->CreateItem(versionString, versionBuild);
+    if (parser.isSet(releaseNotesOption)) {
+      newItem->SetReleaseNotesUrl(releaseNotesUrl);
+    }
 
     if (parser.isSet(macBundleOption)) {
       if (parser.isSet(edDsaKeyOption)) {

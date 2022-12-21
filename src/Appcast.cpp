@@ -454,7 +454,7 @@ bool Appcast::AddItem(AppcastItem* theItem) {
 
   if (!theItem->ReleaseNotesUrl().isEmpty()) {
     QDomElement itemReleaseNotesElement = appcastDoc.createElement("sparkle:releaseNotesLink");
-    QDomText itemReleaseNotesValue = appcastDoc.createTextNode(theItem->ReleaseNotesUrl().toString());
+    QDomText itemReleaseNotesValue = appcastDoc.createTextNode(theItem->ReleaseNotesUrl());
     itemReleaseNotesElement.appendChild(itemReleaseNotesValue);
     itemElement.appendChild(itemReleaseNotesElement);
   }

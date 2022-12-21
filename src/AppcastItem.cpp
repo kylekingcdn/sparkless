@@ -155,7 +155,7 @@ void AppcastItem::SetDescription(const QString& theDescription) {
   description = theDescription;
 }
 
-void AppcastItem::SetReleaseNotesUrl(const QUrl& theUrl) {
+void AppcastItem::SetReleaseNotesUrl(const QString& theUrl) {
 
   releaseNotesUrl = theUrl;
 }
